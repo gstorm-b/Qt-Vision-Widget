@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>icon/add-icon.png</file>
+        <file>icon/load-icon.png</file>
+        <file>icon/update-icon.png</file>
+        <file>icon/dashboard-icon.svg</file>
+        <file>icon/vision-icon.svg</file>
+        <file>icon/robot-icon.svg</file>
+    </qresource>
+    <qresource prefix="/style_sheet">
+        <file>style/main_style.qss</file>
+    </qresource>
+</RCC>
