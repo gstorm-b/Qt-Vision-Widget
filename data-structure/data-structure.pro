@@ -1,32 +1,19 @@
-QT       += core gui svg
+QT = core sql
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-CONFIG += c++17
+CONFIG += c++17 cmdline
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    form\job\dialog_job_select.cpp \
-    main.cpp \
-    mainwindow.cpp
-
-HEADERS += \
-    custom_widget/icon_button.h \
-    custom_widget/tab_widget/tab_widget_button.h \
-    form\job\dialog_job_select.h \
-    mainwindow.h
-
-FORMS += \
-    form\job\dialog_job_select.ui \
-    mainwindow.ui
+        main.cpp \
+        project_manager.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RESOURCES += \
-    resource.qrc
+HEADERS += \
+    project_manager.h

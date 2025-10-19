@@ -198,47 +198,39 @@ QStatusBar {
 
 QToolButton 
 {
-	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(177, 181, 193, 255),stop:1 rgba(159, 163, 174, 255));
-	color: #ffffff;
+	background-color: #3c3f41;
+	color: white;
 	font-weight: bold;
 	border-style: solid;
 	border-width: 1px;
 	border-radius: 3px;
 	border-color: #051a39;
-	padding: 5px;
-
+	padding: 15px;
 }
 
 QToolButton::disabled
 {
-	background-color: #404040;
-	color: #656565;
-	border-color: #051a39;
-
+	color: #777;
+	background-color: #2a2a2a;
+	border: 1px solid #222;
 }
 
 QToolButton::hover
 {
-	background-color: #9fa3ae;
-	color: #ffffff;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 3px;
-	border-color: #051a39;
-	padding: 5px;
-
+	background-color: #505355;
+	border: 1px solid #5c5c5c;
 }
 
 QToolButton::pressed
 {
-	background-color: #7b7e86;
-	color: #ffffff;
-	border-style: solid;
-	border-width: 2px;
-	border-radius: 3px;
-	border-color: #000000;
-	padding: 5px;
+	color: black;
+	background-color: #dfcbd8;
+	border: 1px solid #1e1e1e;
+}
 
+QToolButton:checked {
+	background-color: #2a82da;
+	border: 1px solid #1b4f91;
 }
 
 TabWidgetButton {
@@ -259,7 +251,6 @@ TabWidgetButton::disabled{
 	padding: 8px;
 	/* padding-left: 7px; */
 }
-
 
 TabWidgetButton::hover {
 	background-color: #474747;
