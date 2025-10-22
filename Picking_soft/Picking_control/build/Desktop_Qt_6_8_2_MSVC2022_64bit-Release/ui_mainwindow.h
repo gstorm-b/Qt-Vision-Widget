@@ -13,6 +13,7 @@
 #include <QtGui/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -33,13 +34,21 @@ public:
     QWidget *centralwidget;
     QHBoxLayout *horizontalLayout;
     QVBoxLayout *verticalLayout;
+    TabWidgetButton *tbtn_state_camera;
+    TabWidgetButton *tbtn_state_robot;
+    TabWidgetButton *tbtn_state_plc;
+    QSpacerItem *verticalSpacer_2;
     TabWidgetButton *tbtn_dashboard;
     TabWidgetButton *tbtn_vision;
     TabWidgetButton *tbtn_robot;
     QSpacerItem *verticalSpacer;
     QStackedWidget *stackedWidget;
     QWidget *page;
+    QLabel *label;
     QWidget *page_2;
+    QLabel *label_2;
+    QWidget *page_3;
+    QLabel *label_3;
     QMenuBar *menubar;
     QMenu *menuFile;
     QMenu *menuView;
@@ -49,7 +58,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(906, 489);
+        MainWindow->resize(1014, 639);
         actionExit = new QAction(MainWindow);
         actionExit->setObjectName("actionExit");
         actionChange_language = new QAction(MainWindow);
@@ -62,11 +71,39 @@ public:
         verticalLayout = new QVBoxLayout();
         verticalLayout->setSpacing(0);
         verticalLayout->setObjectName("verticalLayout");
-        tbtn_dashboard = new TabWidgetButton(centralwidget);
-        tbtn_dashboard->setObjectName("tbtn_dashboard");
+        tbtn_state_camera = new TabWidgetButton(centralwidget);
+        tbtn_state_camera->setObjectName("tbtn_state_camera");
         QSizePolicy sizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(tbtn_state_camera->sizePolicy().hasHeightForWidth());
+        tbtn_state_camera->setSizePolicy(sizePolicy);
+        tbtn_state_camera->setMinimumSize(QSize(100, 50));
+
+        verticalLayout->addWidget(tbtn_state_camera);
+
+        tbtn_state_robot = new TabWidgetButton(centralwidget);
+        tbtn_state_robot->setObjectName("tbtn_state_robot");
+        sizePolicy.setHeightForWidth(tbtn_state_robot->sizePolicy().hasHeightForWidth());
+        tbtn_state_robot->setSizePolicy(sizePolicy);
+        tbtn_state_robot->setMinimumSize(QSize(100, 50));
+
+        verticalLayout->addWidget(tbtn_state_robot);
+
+        tbtn_state_plc = new TabWidgetButton(centralwidget);
+        tbtn_state_plc->setObjectName("tbtn_state_plc");
+        sizePolicy.setHeightForWidth(tbtn_state_plc->sizePolicy().hasHeightForWidth());
+        tbtn_state_plc->setSizePolicy(sizePolicy);
+        tbtn_state_plc->setMinimumSize(QSize(100, 50));
+
+        verticalLayout->addWidget(tbtn_state_plc);
+
+        verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::MinimumExpanding);
+
+        verticalLayout->addItem(verticalSpacer_2);
+
+        tbtn_dashboard = new TabWidgetButton(centralwidget);
+        tbtn_dashboard->setObjectName("tbtn_dashboard");
         sizePolicy.setHeightForWidth(tbtn_dashboard->sizePolicy().hasHeightForWidth());
         tbtn_dashboard->setSizePolicy(sizePolicy);
         tbtn_dashboard->setMinimumSize(QSize(100, 100));
@@ -100,17 +137,29 @@ public:
         stackedWidget->setObjectName("stackedWidget");
         page = new QWidget();
         page->setObjectName("page");
+        label = new QLabel(page);
+        label->setObjectName("label");
+        label->setGeometry(QRect(50, 40, 131, 21));
         stackedWidget->addWidget(page);
         page_2 = new QWidget();
         page_2->setObjectName("page_2");
+        label_2 = new QLabel(page_2);
+        label_2->setObjectName("label_2");
+        label_2->setGeometry(QRect(70, 50, 111, 21));
         stackedWidget->addWidget(page_2);
+        page_3 = new QWidget();
+        page_3->setObjectName("page_3");
+        label_3 = new QLabel(page_3);
+        label_3->setObjectName("label_3");
+        label_3->setGeometry(QRect(90, 60, 111, 21));
+        stackedWidget->addWidget(page_3);
 
         horizontalLayout->addWidget(stackedWidget);
 
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 906, 21));
+        menubar->setGeometry(QRect(0, 0, 1014, 21));
         menuFile = new QMenu(menubar);
         menuFile->setObjectName("menuFile");
         menuView = new QMenu(menubar);
@@ -127,6 +176,9 @@ public:
 
         retranslateUi(MainWindow);
 
+        stackedWidget->setCurrentIndex(2);
+
+
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
 
@@ -135,9 +187,15 @@ public:
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
         actionExit->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
         actionChange_language->setText(QCoreApplication::translate("MainWindow", "Change language", nullptr));
+        tbtn_state_camera->setText(QCoreApplication::translate("MainWindow", "Camera connect", nullptr));
+        tbtn_state_robot->setText(QCoreApplication::translate("MainWindow", "Robot connect", nullptr));
+        tbtn_state_plc->setText(QCoreApplication::translate("MainWindow", "PLC Connect", nullptr));
         tbtn_dashboard->setText(QCoreApplication::translate("MainWindow", "Dashboard", nullptr));
         tbtn_vision->setText(QCoreApplication::translate("MainWindow", "Vision", nullptr));
         tbtn_robot->setText(QCoreApplication::translate("MainWindow", "Robot", nullptr));
+        label->setText(QCoreApplication::translate("MainWindow", "This is dashboard", nullptr));
+        label_2->setText(QCoreApplication::translate("MainWindow", "This is vision", nullptr));
+        label_3->setText(QCoreApplication::translate("MainWindow", "This is robot", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
     } // retranslateUi

@@ -15,9 +15,6 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::init_main_screen() {
-  ui->tbtn_dashboard->setCheckable(true);
-  ui->tbtn_vision->setCheckable(true);
-  ui->tbtn_robot->setCheckable(true);
 
   ui->tbtn_dashboard->setText(tr("Dashboard"));
   ui->tbtn_dashboard->setIcon(QIcon(":/icon/icon/dashboard-icon.svg"));
@@ -35,29 +32,42 @@ void MainWindow::init_main_screen() {
   ui->tbtn_robot->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
   connect(ui->tbtn_dashboard, &TabWidgetButton::clicked,
-          this, &MainWindow::tbtn_dashboard_clicked);
+          this, &MainWindow::tbtn_navigate_clicked);
   connect(ui->tbtn_vision, &TabWidgetButton::clicked,
-          this, &MainWindow::tbtn_vision_clicked);
+          this, &MainWindow::tbtn_navigate_clicked);
   connect(ui->tbtn_robot, &TabWidgetButton::clicked,
-          this, &MainWindow::tbtn_robot_clicked);
+          this, &MainWindow::tbtn_navigate_clicked);
 
-  tbtn_dashboard_clicked();
-}
+  // widget_list.insert(ui->tbtn_dashboard->objectName(), ui->page);
+  // widget_list.insert(ui->tbtn_vision->objectName(), ui->page_2);
+  // widget_list.insert(ui->tbtn_robot->objectName(), ui->page_3);
 
-void MainWindow::tbtn_dashboard_clicked() {
+  widget_list.insert(ui->tbtn_dashboard, ui->page);
+  widget_list.insert(ui->tbtn_vision, ui->page_2);
+  widget_list.insert(ui->tbtn_robot, ui->page_3);
+
+  ui->tbtn_dashboard->setCheckable(true);
+  ui->tbtn_vision->setCheckable(true);
+  ui->tbtn_robot->setCheckable(true);
+
   ui->tbtn_dashboard->setChecked(true);
   ui->tbtn_vision->setChecked(false);
   ui->tbtn_robot->setChecked(false);
+
+  ui->stackedWidget->setCurrentWidget(ui->page);
 }
 
-void MainWindow::tbtn_vision_clicked() {
-  ui->tbtn_dashboard->setChecked(false);
-  ui->tbtn_vision->setChecked(true);
-  ui->tbtn_robot->setChecked(false);
+void MainWindow::tbtn_navigate_clicked() {
+  // active widget
+  QObject *sender_btn = sender();
+  QWidget *wg = widget_list.value(sender_btn, nullptr);
+  if (wg != nullptr) {
+    ui->stackedWidget->setCurrentWidget(wg);
+  }
+
+  for (auto index = widget_list.cbegin(), end = widget_list.cend(); index != end; ++index) {
+    TabWidgetButton* btn = qobject_cast<TabWidgetButton*>(index.key());
+    btn->setChecked(btn == sender_btn);
+  }
 }
 
-void MainWindow::tbtn_robot_clicked() {
-  ui->tbtn_dashboard->setChecked(false);
-  ui->tbtn_vision->setChecked(false);
-  ui->tbtn_robot->setChecked(true);
-}

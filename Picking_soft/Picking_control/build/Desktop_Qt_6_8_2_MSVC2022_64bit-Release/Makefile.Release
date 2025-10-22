@@ -415,6 +415,7 @@ release\moc_icon_button.cpp: ..\..\custom_widget\icon_button.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\qguiapplication_platform.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\QIcon \
 		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QEvent \
+		C:\Qt\6.8.2\msvc2022_64\include\QtGui\QEnterEvent \
 		release\moc_predefs.h \
 		C:\Qt\6.8.2\msvc2022_64\bin\moc.exe
 	C:\Qt\6.8.2\msvc2022_64\bin\moc.exe $(DEFINES) --compiler-flavor=msvc --include "D:/Personal project/Vision/Qt-Vision-Widget/Picking_soft/Picking_control/build/Desktop_Qt_6_8_2_MSVC2022_64bit-Release/release/moc_predefs.h" -IC:/Qt/6.8.2/msvc2022_64/mkspecs/win32-msvc -I"D:/Personal project/Vision/Qt-Vision-Widget/Picking_soft/Picking_control" -IC:/Qt/6.8.2/msvc2022_64/include -IC:/Qt/6.8.2/msvc2022_64/include/QtSvg -IC:/Qt/6.8.2/msvc2022_64/include/QtWidgets -IC:/Qt/6.8.2/msvc2022_64/include/QtGui -IC:/Qt/6.8.2/msvc2022_64/include/QtCore -I. -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\ATLMFC\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\ucrt" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\um" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\shared" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\winrt" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\cppwinrt" -I"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\include\um" ..\..\custom_widget\icon_button.h -o release\moc_icon_button.cpp
@@ -1003,6 +1004,10 @@ release\moc_mainwindow.cpp: ..\..\mainwindow.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtCore\qlocale.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\qguiapplication_platform.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qtabwidget.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QMap \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QToolButton \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qtoolbutton.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qabstractbutton.h \
 		release\moc_predefs.h \
 		C:\Qt\6.8.2\msvc2022_64\bin\moc.exe
 	C:\Qt\6.8.2\msvc2022_64\bin\moc.exe $(DEFINES) --compiler-flavor=msvc --include "D:/Personal project/Vision/Qt-Vision-Widget/Picking_soft/Picking_control/build/Desktop_Qt_6_8_2_MSVC2022_64bit-Release/release/moc_predefs.h" -IC:/Qt/6.8.2/msvc2022_64/mkspecs/win32-msvc -I"D:/Personal project/Vision/Qt-Vision-Widget/Picking_soft/Picking_control" -IC:/Qt/6.8.2/msvc2022_64/include -IC:/Qt/6.8.2/msvc2022_64/include/QtSvg -IC:/Qt/6.8.2/msvc2022_64/include/QtWidgets -IC:/Qt/6.8.2/msvc2022_64/include/QtGui -IC:/Qt/6.8.2/msvc2022_64/include/QtCore -I. -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\ATLMFC\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\ucrt" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\um" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\shared" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\winrt" -I"C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\cppwinrt" -I"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\include\um" ..\..\mainwindow.h -o release\moc_mainwindow.cpp
@@ -1209,7 +1214,8 @@ ui_dialog_job_select.h: ..\..\form\job\dialog_job_select.ui \
 		C:\Qt\6.8.2\msvc2022_64\include\QtCore\qlocale.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\qguiapplication_platform.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\QIcon \
-		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QEvent
+		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QEvent \
+		C:\Qt\6.8.2\msvc2022_64\include\QtGui\QEnterEvent
 	C:\Qt\6.8.2\msvc2022_64\bin\uic.exe ..\..\form\job\dialog_job_select.ui -o ui_dialog_job_select.h
 
 ui_mainwindow.h: ..\..\mainwindow.ui \
@@ -2037,6 +2043,10 @@ release\main.obj: ..\..\main.cpp ..\..\mainwindow.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtCore\qlocale.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\qguiapplication_platform.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qtabwidget.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QMap \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QToolButton \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qtoolbutton.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qabstractbutton.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QApplication \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qapplication.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QFile \
@@ -2239,6 +2249,10 @@ release\mainwindow.obj: ..\..\mainwindow.cpp ..\..\mainwindow.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtCore\qlocale.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtGui\qguiapplication_platform.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qtabwidget.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtCore\QMap \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QToolButton \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qtoolbutton.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qabstractbutton.h \
 		ui_mainwindow.h
 
 release\qrc_resource.obj: release\qrc_resource.cpp 
