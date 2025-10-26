@@ -1,6 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
+#include "form/robot/moveleditor.h"
+#include "custom_widget/robot/commandeditor.h"
+#include "custom_widget/image_widget.h"
+
 MainWindow::MainWindow(
     QWidget *parent)
     : QMainWindow(parent)
@@ -38,13 +43,9 @@ void MainWindow::init_main_screen() {
   connect(ui->tbtn_robot, &TabWidgetButton::clicked,
           this, &MainWindow::tbtn_navigate_clicked);
 
-  // widget_list.insert(ui->tbtn_dashboard->objectName(), ui->page);
-  // widget_list.insert(ui->tbtn_vision->objectName(), ui->page_2);
-  // widget_list.insert(ui->tbtn_robot->objectName(), ui->page_3);
-
-  widget_list.insert(ui->tbtn_dashboard, ui->page);
-  widget_list.insert(ui->tbtn_vision, ui->page_2);
-  widget_list.insert(ui->tbtn_robot, ui->page_3);
+  widget_list.insert(ui->tbtn_dashboard, ui->page_dashboard);
+  widget_list.insert(ui->tbtn_vision, ui->page_vision);
+  widget_list.insert(ui->tbtn_robot, ui->page_robot);
 
   ui->tbtn_dashboard->setCheckable(true);
   ui->tbtn_vision->setCheckable(true);
@@ -54,7 +55,32 @@ void MainWindow::init_main_screen() {
   ui->tbtn_vision->setChecked(false);
   ui->tbtn_robot->setChecked(false);
 
-  ui->stackedWidget->setCurrentWidget(ui->page);
+  ui->stackedWidget->setCurrentWidget(ui->page_dashboard);
+
+  ui->treeView->registerCommandType("MoveL", []{ return std::make_shared<rp::HyMoveLCommand>(); });
+  ui->treeView->registerCommandType("If",    []{ return std::make_shared<rp::HyIfCommand>(); });
+
+  command_list_model = ui->treeView->model();
+
+  rp::EditorRegistry::registerEditor("MoveL", [](QWidget* p){ return new rp::MoveLEditor(p); });
+
+  connect(ui->btn_move_up, &QPushButton::clicked,
+          this, &MainWindow::btn_move_up_clicked);
+  connect(ui->btn_move_down, &QPushButton::clicked,
+          this, &MainWindow::btn_move_down_clicked);
+  connect(ui->treeView, &rp::CommandTreeView::commandClicked,
+          this, &MainWindow::CommandClicked);
+
+  QString path = "image_6.bmp";
+  QPixmap pixmap(path);
+  qDebug() << "Is image null:" << pixmap.isNull();
+  ui->graphicsView_main->setPixmap(pixmap);
+  ui->graphicsView_main->fitImage();
+
+  connect(ui->btn_set_roi, &QPushButton::clicked,
+          this, &MainWindow::btn_set_roi_clicked);
+  connect(ui->btn_set_polygon, &QPushButton::clicked,
+          this, &MainWindow::btn_set_polygon_clicked);
 }
 
 void MainWindow::tbtn_navigate_clicked() {
@@ -71,3 +97,24 @@ void MainWindow::tbtn_navigate_clicked() {
   }
 }
 
+void MainWindow::btn_move_up_clicked() {
+  command_list_model->moveUp(ui->treeView->currentIndex());
+}
+
+void MainWindow::btn_move_down_clicked() {
+  command_list_model->moveDown(ui->treeView->currentIndex());
+}
+
+void MainWindow::CommandClicked(rp::Command* cmd) {
+  ui->stackedWidget_cmd_editor->editCommand(ui->treeView->model(), cmd);
+}
+
+void MainWindow::btn_set_roi_clicked() {
+  ui->graphicsView_main->setInteractionMode(
+      ImageWidget::InteractionMode::DrawRect);
+}
+
+void MainWindow::btn_set_polygon_clicked() {
+  ui->graphicsView_main->setInteractionMode(
+      ImageWidget::InteractionMode::Navigate);
+}

@@ -5,6 +5,8 @@
 
 #include "form/job/dialog_job_select.h"
 
+#define TURN_OFF_SELECT_JOB
+
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
@@ -14,9 +16,11 @@ int main(int argc, char *argv[]) {
   QString styleSheet = QLatin1String(styleSheetFile.readAll());
   a.setStyleSheet(styleSheet);
 
+#ifndef TURN_OFF_SELECT_JOB
   DialogJobSelect form_job;
   form_job.show();
   form_job.exec();
+#endif
 
   MainWindow w;
   w.show();

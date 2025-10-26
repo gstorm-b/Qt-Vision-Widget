@@ -13,15 +13,20 @@
 #include <QtGui/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <custom_widget/image_widget.h>
+#include <custom_widget/robot/commandeditorpanel.h>
+#include <custom_widget/robot/commandtreeview.h>
 #include <custom_widget/tab_widget/tab_widget_button.h>
 
 QT_BEGIN_NAMESPACE
@@ -43,12 +48,27 @@ public:
     TabWidgetButton *tbtn_robot;
     QSpacerItem *verticalSpacer;
     QStackedWidget *stackedWidget;
-    QWidget *page;
+    QWidget *page_dashboard;
     QLabel *label;
+    QWidget *page_vision;
+    QHBoxLayout *horizontalLayout_4;
+    ImageWidget *graphicsView_main;
+    QVBoxLayout *verticalLayout_3;
+    QPushButton *btn_set_roi;
+    QPushButton *btn_set_polygon;
+    QSpacerItem *verticalSpacer_3;
+    QWidget *page_robot;
+    QHBoxLayout *horizontalLayout_3;
+    QVBoxLayout *verticalLayout_2;
+    QHBoxLayout *horizontalLayout_2;
+    QPushButton *btn_add;
+    QPushButton *btn_delete;
+    QPushButton *btn_move_up;
+    QPushButton *btn_move_down;
+    rp::CommandTreeView *treeView;
+    rp::CommandEditorPanel *stackedWidget_cmd_editor;
+    QWidget *page;
     QWidget *page_2;
-    QLabel *label_2;
-    QWidget *page_3;
-    QLabel *label_3;
     QMenuBar *menubar;
     QMenu *menuFile;
     QMenu *menuView;
@@ -135,24 +155,96 @@ public:
 
         stackedWidget = new QStackedWidget(centralwidget);
         stackedWidget->setObjectName("stackedWidget");
-        page = new QWidget();
-        page->setObjectName("page");
-        label = new QLabel(page);
+        page_dashboard = new QWidget();
+        page_dashboard->setObjectName("page_dashboard");
+        label = new QLabel(page_dashboard);
         label->setObjectName("label");
         label->setGeometry(QRect(50, 40, 131, 21));
-        stackedWidget->addWidget(page);
+        stackedWidget->addWidget(page_dashboard);
+        page_vision = new QWidget();
+        page_vision->setObjectName("page_vision");
+        horizontalLayout_4 = new QHBoxLayout(page_vision);
+        horizontalLayout_4->setObjectName("horizontalLayout_4");
+        graphicsView_main = new ImageWidget(page_vision);
+        graphicsView_main->setObjectName("graphicsView_main");
+
+        horizontalLayout_4->addWidget(graphicsView_main);
+
+        verticalLayout_3 = new QVBoxLayout();
+        verticalLayout_3->setObjectName("verticalLayout_3");
+        btn_set_roi = new QPushButton(page_vision);
+        btn_set_roi->setObjectName("btn_set_roi");
+
+        verticalLayout_3->addWidget(btn_set_roi);
+
+        btn_set_polygon = new QPushButton(page_vision);
+        btn_set_polygon->setObjectName("btn_set_polygon");
+
+        verticalLayout_3->addWidget(btn_set_polygon);
+
+        verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+
+        verticalLayout_3->addItem(verticalSpacer_3);
+
+
+        horizontalLayout_4->addLayout(verticalLayout_3);
+
+        stackedWidget->addWidget(page_vision);
+        page_robot = new QWidget();
+        page_robot->setObjectName("page_robot");
+        horizontalLayout_3 = new QHBoxLayout(page_robot);
+        horizontalLayout_3->setObjectName("horizontalLayout_3");
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setObjectName("verticalLayout_2");
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName("horizontalLayout_2");
+        btn_add = new QPushButton(page_robot);
+        btn_add->setObjectName("btn_add");
+
+        horizontalLayout_2->addWidget(btn_add);
+
+        btn_delete = new QPushButton(page_robot);
+        btn_delete->setObjectName("btn_delete");
+
+        horizontalLayout_2->addWidget(btn_delete);
+
+        btn_move_up = new QPushButton(page_robot);
+        btn_move_up->setObjectName("btn_move_up");
+
+        horizontalLayout_2->addWidget(btn_move_up);
+
+        btn_move_down = new QPushButton(page_robot);
+        btn_move_down->setObjectName("btn_move_down");
+
+        horizontalLayout_2->addWidget(btn_move_down);
+
+
+        verticalLayout_2->addLayout(horizontalLayout_2);
+
+        treeView = new rp::CommandTreeView(page_robot);
+        treeView->setObjectName("treeView");
+        treeView->setDragDropMode(QAbstractItemView::DragDropMode::InternalMove);
+        treeView->setDefaultDropAction(Qt::DropAction::MoveAction);
+
+        verticalLayout_2->addWidget(treeView);
+
+
+        horizontalLayout_3->addLayout(verticalLayout_2);
+
+        stackedWidget_cmd_editor = new rp::CommandEditorPanel(page_robot);
+        stackedWidget_cmd_editor->setObjectName("stackedWidget_cmd_editor");
+        page = new QWidget();
+        page->setObjectName("page");
+        stackedWidget_cmd_editor->addWidget(page);
         page_2 = new QWidget();
         page_2->setObjectName("page_2");
-        label_2 = new QLabel(page_2);
-        label_2->setObjectName("label_2");
-        label_2->setGeometry(QRect(70, 50, 111, 21));
-        stackedWidget->addWidget(page_2);
-        page_3 = new QWidget();
-        page_3->setObjectName("page_3");
-        label_3 = new QLabel(page_3);
-        label_3->setObjectName("label_3");
-        label_3->setGeometry(QRect(90, 60, 111, 21));
-        stackedWidget->addWidget(page_3);
+        stackedWidget_cmd_editor->addWidget(page_2);
+
+        horizontalLayout_3->addWidget(stackedWidget_cmd_editor);
+
+        horizontalLayout_3->setStretch(0, 2);
+        horizontalLayout_3->setStretch(1, 1);
+        stackedWidget->addWidget(page_robot);
 
         horizontalLayout->addWidget(stackedWidget);
 
@@ -176,7 +268,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        stackedWidget->setCurrentIndex(2);
+        stackedWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -194,8 +286,12 @@ public:
         tbtn_vision->setText(QCoreApplication::translate("MainWindow", "Vision", nullptr));
         tbtn_robot->setText(QCoreApplication::translate("MainWindow", "Robot", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "This is dashboard", nullptr));
-        label_2->setText(QCoreApplication::translate("MainWindow", "This is vision", nullptr));
-        label_3->setText(QCoreApplication::translate("MainWindow", "This is robot", nullptr));
+        btn_set_roi->setText(QCoreApplication::translate("MainWindow", "Set ROI", nullptr));
+        btn_set_polygon->setText(QCoreApplication::translate("MainWindow", "Set Polygon", nullptr));
+        btn_add->setText(QCoreApplication::translate("MainWindow", "Add", nullptr));
+        btn_delete->setText(QCoreApplication::translate("MainWindow", "Delete", nullptr));
+        btn_move_up->setText(QCoreApplication::translate("MainWindow", "Move up", nullptr));
+        btn_move_down->setText(QCoreApplication::translate("MainWindow", "Move down", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
     } // retranslateUi

@@ -5,6 +5,86 @@ Company: GTRONICK
 Last updated: 17/04/2018
 Available at: https://github.com/GTRONICK/QSS/blob/master/ElegantDark.qss
 */
+
+QTreeView {
+    background-color: #1e1e1e;              /* màu nền chính */
+    color: #dddddd;                         /* màu chữ */
+    border: 1px solid #3a3a3a;              /* viền ngoài */
+    alternate-background-color: #252525;    /* màu xen kẽ giữa các dòng */
+    show-decoration-selected: 1;
+    selection-background-color: #3d6aff;
+    selection-color: white;
+    font: 14px "Segoe UI";
+}
+
+QTreeView::item {
+    height: 28px;
+    padding: 4px 6px;
+    border: none;
+}
+
+QTreeView::item:hover {
+    background-color: #2d2d2d;
+}
+
+QTreeView::item:selected {
+    background-color: #3d6aff;
+    color: white;
+}
+
+QTreeView::item:selected:!active {
+    background-color: #2f4ca1;
+    color: #cccccc;
+}
+
+QTreeView::branch {
+    background: transparent;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    image: url(:/icons/arrow-right.svg);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    image: url(:/icon/icon/plus-square-icon.svg);
+}
+
+QTreeView::branch:has-children {
+    padding-left: 4px;
+}
+
+QHeaderView::section {
+    background-color: #2b2b2b;
+    color: #cccccc;
+    padding: 6px;
+    border: none;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+QHeaderView::section:hover {
+    background-color: #3a3a3a;
+}
+
+QScrollBar:vertical {
+    background: #1e1e1e;
+    width: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3d3d3d;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #5d5d5d;
+}
+
+
+
 QMainWindow {
 	background-color:#5c5c5c;
 }
@@ -281,3 +361,5 @@ TabWidgetButton:checked {
 	padding: 8px;
 	border-left: 6px solid #00aa00;
 }
+
+

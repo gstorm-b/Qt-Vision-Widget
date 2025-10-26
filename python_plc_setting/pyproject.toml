@@ -1,0 +1,5 @@
+[project]
+name = "PLC Show List"
+
+[tool.pyside6-project]
+files = ["form.ui", "mainwindow.py", "plc_list_view.py"]
