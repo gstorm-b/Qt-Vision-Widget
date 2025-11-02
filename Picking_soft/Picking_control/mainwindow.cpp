@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
 #include "form/robot/moveleditor.h"
 #include "custom_widget/robot/commandeditor.h"
 #include "custom_widget/image_widget.h"
+#include "custom_widget/dialog_set_new_pattern.h"
 
 MainWindow::MainWindow(
     QWidget *parent)
@@ -74,8 +74,8 @@ void MainWindow::init_main_screen() {
   QString path = "image_6.bmp";
   QPixmap pixmap(path);
   qDebug() << "Is image null:" << pixmap.isNull();
-  ui->graphicsView_main->setPixmap(pixmap);
-  ui->graphicsView_main->fitImage();
+  ui->graphicsView_main->loadImage(pixmap);
+  // ui->graphicsView_main->
 
   connect(ui->btn_set_roi, &QPushButton::clicked,
           this, &MainWindow::btn_set_roi_clicked);
@@ -110,11 +110,10 @@ void MainWindow::CommandClicked(rp::Command* cmd) {
 }
 
 void MainWindow::btn_set_roi_clicked() {
-  ui->graphicsView_main->setInteractionMode(
-      ImageWidget::InteractionMode::DrawRect);
+  ui->graphicsView_main->startDrawROI();
 }
 
 void MainWindow::btn_set_polygon_clicked() {
-  ui->graphicsView_main->setInteractionMode(
-      ImageWidget::InteractionMode::Navigate);
+  DialogSetNewPattern new_pattern_set;
+  new_pattern_set.exec();
 }

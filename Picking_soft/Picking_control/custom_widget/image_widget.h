@@ -9,79 +9,115 @@
 #include <QWheelEvent>
 #include <QMouseEvent>
 
+#include <QMouseEvent>
+#include <QWheelEvent>
+#include <QWidget>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QSettings>
+#include <QPointF>
+#include <QGraphicsItemGroup>
+#include <QGraphicsPixmapItem>
+#include <QAction>
+
+#include "custom_widget/item_pixmap_bounding.h"
+#include "custom_widget/item_roi.h"
+#include "custom_widget/item_roi_rotated.h"
+
 class ImageWidget : public QGraphicsView {
   Q_OBJECT
+
 public:
-  enum InteractionMode { Navigate, DrawRect, DrawPolygon };
-  Q_ENUM(InteractionMode)
+  enum InteractMode {
+    IModeNone,
+    IModeZoom,
+    IModePan,
+    IModeDrawing
+  };
 
   explicit ImageWidget(QWidget *parent = nullptr);
-  ~ImageWidget() override = default;
-
-  void setPixmap(const QPixmap &pix);
-  void fitImage();
-  void setInteractionMode(InteractionMode mode);
-  InteractionMode interactionMode() const { return m_mode; }
+  ~ImageWidget();
+  void setSettings(QSettings *setting);
+  void removeSettings();
+  QPixmap getImage();
+  QPixmap getCroppedFromRoi(ItemRoi *roi);
+  void setEnableMouseMenu(bool enable);
+  const bool isUseMouseMenu();
+  void showChooseImageDialog();
+  bool hadImage();
 
 public slots:
-  void cancelDrawing();
-  void undoPolygonVertex();
+  void loadImage(const QString &filePath);
+  void loadImage(QPixmap &pixmap);
+  void removeImage();
+  void startDrawROI();
+  void deletedSelectedItems();
 
 signals:
-  void roiRectFinished(const QRectF &rect);       // scene coordinates
-  void polygonFinished(const QPolygonF &poly);   // scene coordinates
-  void drawingCanceled();
+  void signal_draw_roi_finished(ItemRoi *roi);
 
 protected:
-  // Events
-  void wheelEvent(QWheelEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
+  void mouseDoubleClickEvent(QMouseEvent *event) override;
+  void wheelEvent(QWheelEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;
   void keyReleaseEvent(QKeyEvent *event) override;
-  void resizeEvent(QResizeEvent *event) override;
 
 private:
-  // helpers
-  QPointF mapToSceneF(const QPoint &viewPoint) const;
-  void startRect(const QPointF &scenePos);
-  void updateRect(const QPointF &scenePos);
-  void finishRect();
-  void startPolygon(const QPointF &scenePos);
-  void addPolygonVertex(const QPointF &scenePos);
-  void updatePolygonPreview();
-  void finishPolygon();
-  void cancelCurrentDrawing();
+  void init_mouse_menu();
+  void createPixmapItem(QPixmap &pixmap);
 
-  // zoom/pan
-  void scaleView(qreal factor);
-  bool isSpacePanning() const { return m_spacePressed; }
+  void changeInteractMode(InteractMode mode);
+  void backToPreviousMode();
+  void changeCursor();
+  QString interactMode2String(InteractMode mode);
+
+  bool rightMouseButtonPressed(QMouseEvent *event);
+  bool leftMouseButtonPressed(QMouseEvent *event);
+  bool rightMouseButtonReleased(QMouseEvent *event);
+  bool leftMouseButtonReleased(QMouseEvent *event);
+
+  void showRightMouseClickMenu(QMouseEvent *event);
+
+  bool draw_startROI(QMouseEvent *event);
+  bool draw_endROI(QMouseEvent *event);
+  void draw_updateROI(QMouseEvent *event);
+  void draw_cancelROI();
 
 private:
-  QGraphicsScene *m_scene = nullptr;
-  QGraphicsPixmapItem *m_pixItem = nullptr;
+  QGraphicsScene *m_scene;
+  PixmapBoundingLine *m_pixmapItem;
+  QRectF m_pixmap_bounding_rect;
 
-  // drawing rect
-  QGraphicsRectItem *m_currentRect = nullptr;
-  QPointF m_rectStartScene;
+  QSettings *m_setting;
+  bool m_using_user_setting;
 
-  // drawing polygon
-  QGraphicsPolygonItem *m_polygonPreview = nullptr;
-  QPolygonF m_polygonPoints;
+  bool m_using_mouse_menu;
 
-  InteractionMode m_mode = Navigate;
+  InteractMode m_current_mode;
+  InteractMode m_previous_mode;
+  bool m_scene_interacting;
 
-  // state for panning
-  bool m_panning = false;
-  bool m_spacePressed = false;
-  QPoint m_lastPanPoint;
+  bool m_has_panned;
+  QPoint m_last_pan_point;
 
-  // zoom control
-  qreal m_zoomFactor = 1.0;
-  const qreal m_zoomStep = 1.15;
-  const qreal m_maxZoom = 100;
-  const qreal m_minZoom = 0.01;
+  bool m_roi_started;
+  QGraphicsRectItem *m_temp_roi;
+  QPointF m_roi_start_point;
+  ItemRoi *temp_editable_roi;
+
+  /// Right Click Menu
+  QMenu *menu_right_mouse;
+  QMenu *menu_right_mouse_full;
+  QMenu *menu_right_mouse_roi;
+  QAction *action_add_roi;
+  QAction *action_delete_roi;
+  QAction *action_save_roi;
+  QAction *action_load_img;
+  QAction *action_remove_img;
+  QAction *action_reset_img;
 };
 
 #endif // IMAGE_WIDGET_H

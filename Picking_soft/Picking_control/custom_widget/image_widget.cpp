@@ -1,336 +1,652 @@
 #include "image_widget.h"
 
-#include <QScrollBar>
+#include <QFileDialog>
+#include <QMenu>
+
 #include <QDebug>
-#include <QApplication>
+#include <QGraphicsPixmapItem>
+#include <QScrollBar>
+
+#ifdef ENABLE_DEBUG_MODE
+#define PRINT_DEBUG_INFO(msg)　qDebug() << msg
+#else
+#define PRINT_DEBUG_INFO(msg) //
+#endif
 
 ImageWidget::ImageWidget(QWidget *parent)
     : QGraphicsView(parent),
     m_scene(new QGraphicsScene(this)),
-    m_pixItem(nullptr),
-    m_currentRect(nullptr),
-    m_polygonPreview(nullptr) {
-  setScene(m_scene);
-  setRenderHint(QPainter::Antialiasing, true);
-  setRenderHint(QPainter::SmoothPixmapTransform, true);
-  setDragMode(QGraphicsView::NoDrag);
-  setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    m_pixmapItem(nullptr),
+    m_setting(nullptr),
+    m_using_user_setting(false),
+    m_using_mouse_menu(false),
+    m_current_mode(IModeNone),
+    m_previous_mode(IModeNone),
+    m_scene_interacting(false),
+    m_has_panned(false),
+    m_roi_started(false) {
 
-  // Smooth interaction defaults
-  setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-  setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+  this->setScene(m_scene);
+
+  QBrush brush(QColor(0x9c988f));
+  this->setBackgroundBrush(brush);
+
+  // set view port update mode to avoid ghosting
+  this->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+  // off smooth pixmap transform to disable blur when zoom in
+  this->setRenderHint(QPainter::SmoothPixmapTransform, false);
+
+  init_mouse_menu();
 }
 
-void ImageWidget::setPixmap(const QPixmap &pix)
-{
-  m_scene->clear();
-  m_pixItem = m_scene->addPixmap(pix);
-  m_pixItem->setZValue(0);
-  m_scene->setSceneRect(m_pixItem->boundingRect());
-  fitImage();
+ImageWidget::~ImageWidget() {
+  // delete m_pixmapItem;
 }
 
-void ImageWidget::fitImage()
-{
-  if (!m_pixItem) return;
-  fitInView(m_pixItem, Qt::KeepAspectRatio);
-  m_zoomFactor = transform().m11(); // approximate
-}
-
-void ImageWidget::setInteractionMode(InteractionMode mode)
-{
-  cancelCurrentDrawing();
-  m_mode = mode;
-  // change cursor for UX
-  if (m_mode == Navigate) setCursor(Qt::ArrowCursor);
-  else if (m_mode == DrawRect) setCursor(Qt::CrossCursor);
-  else if (m_mode == DrawPolygon) setCursor(Qt::CrossCursor);
-}
-
-void ImageWidget::cancelDrawing()
-{
-  cancelCurrentDrawing();
-  emit drawingCanceled();
-}
-
-void ImageWidget::undoPolygonVertex()
-{
-  if (m_mode != DrawPolygon) return;
-  if (!m_polygonPoints.isEmpty()) {
-    m_polygonPoints.removeLast();
-    updatePolygonPreview();
-  }
-}
-
-QPointF ImageWidget::mapToSceneF(const QPoint &viewPoint) const
-{
-  return mapToScene(viewPoint);
-}
-
-// ---------- Mouse / wheel / key events ----------
-
-void ImageWidget::wheelEvent(QWheelEvent *event)
-{
-  // Zoom when Ctrl is pressed OR when no modifier and user wants wheel zoom default.
-  // Adjust to your preference.
-  const bool ctrl = event->modifiers() & Qt::ControlModifier;
-  if (ctrl) {
-    const qreal delta = event->angleDelta().y();
-    if (delta > 0) scaleView(m_zoomStep);
-    else if (delta < 0) scaleView(1.0 / m_zoomStep);
-    event->accept();
+void ImageWidget::setSettings(QSettings *setting) {
+  if (setting == nullptr) {
     return;
   }
 
-  // otherwise pass to base class for normal behavior (scroll)
-  QGraphicsView::wheelEvent(event);
+  if ((!m_using_user_setting) && (this->m_setting != nullptr)){
+    delete this->m_setting;
+  }
+
+  this->m_setting = setting;
+  m_using_user_setting = true;
 }
 
-void ImageWidget::mousePressEvent(QMouseEvent *event)
-{
-  // Middle button pan
-  if (event->button() == Qt::MiddleButton) {
-    m_panning = true;
-    m_lastPanPoint = event->pos();
-    setCursor(Qt::ClosedHandCursor);
-    event->accept();
+void ImageWidget::removeSettings() {
+  if ((m_using_user_setting) && (this->m_setting != nullptr)){
+    this->m_setting = nullptr;
+    m_using_user_setting = false;
+  }
+}
+
+QPixmap ImageWidget::getImage() {
+  return m_pixmapItem->pixmap();
+}
+
+QPixmap ImageWidget::getCroppedFromRoi(ItemRoi *roi) {
+  if (roi == nullptr) {
+    return QPixmap();
+  }
+
+  const QPixmap &pixmap = m_pixmapItem->pixmap();
+
+  QRectF save_rect = roi->getRoi();
+  QRect roi_int = save_rect.toAlignedRect();
+  roi_int = roi_int.intersected(pixmap.rect());
+  if (roi_int.isEmpty()) {
+    return QPixmap();;
+  }
+
+  // QPixmap cropped = pixmap.copy(roi_int);
+  return pixmap.copy(roi_int);
+}
+
+void ImageWidget::setEnableMouseMenu(bool enable) {
+  m_using_mouse_menu = enable;
+}
+
+const bool ImageWidget::isUseMouseMenu() {
+  return m_using_mouse_menu;
+}
+
+void ImageWidget::loadImage(const QString &filePath) {
+  QImage image(filePath);
+  if (image.isNull()) {
+    PRINT_DEBUG_INFO("Failed to load image:" << filePath);
     return;
   }
 
-  // space + left drag -> pan (very common UX)
-  if (event->button() == Qt::LeftButton && isSpacePanning()) {
-    m_panning = true;
-    m_lastPanPoint = event->pos();
-    setCursor(Qt::ClosedHandCursor);
-    event->accept();
+  QPixmap pixmap = QPixmap::fromImage(image);
+  if (!m_pixmapItem) {
+    createPixmapItem(pixmap);
+    // using FastTransformation to avoid blur image
+    m_pixmapItem->setTransformationMode(Qt::FastTransformation);
+  } else {
+    m_pixmapItem->setPixmap(pixmap);
+  }
+
+  m_scene->setSceneRect(pixmap.rect().adjusted(-15, -15, 10, 10));
+  // fit image with current window size
+  m_pixmap_bounding_rect = m_pixmapItem->boundingRect();
+  this->fitInView(m_pixmap_bounding_rect, Qt::KeepAspectRatio);
+}
+
+void ImageWidget::loadImage(QPixmap &pixmap) {
+  if (!m_pixmapItem) {
+    createPixmapItem(pixmap);
+    // using FastTransformation to avoid blur image
+    m_pixmapItem->setTransformationMode(Qt::FastTransformation);
+  } else {
+    m_pixmapItem->setPixmap(pixmap);
+  }
+
+  m_scene->setSceneRect(pixmap.rect().adjusted(-10, -10, 10, 10));
+  // fit image with current window size
+  m_pixmap_bounding_rect = m_pixmapItem->boundingRect();
+  this->fitInView(m_pixmap_bounding_rect, Qt::KeepAspectRatio);
+}
+
+void ImageWidget::removeImage() {
+  if (!hadImage()) {
+    PRINT_DEBUG_INFO("[IMG ROI Widget] Remove failed, image empty.");
     return;
   }
 
-  // Interaction modes with left click
-  if (event->button() == Qt::LeftButton) {
-    QPointF scenePos = mapToSceneF(event->pos());
-    if (m_mode == DrawRect) {
-      startRect(scenePos);
-      event->accept();
-      return;
-    } else if (m_mode == DrawPolygon) {
-      // left click adds vertex
-      addPolygonVertex(scenePos);
-      event->accept();
-      return;
-    }
+  m_scene->removeItem(m_pixmapItem);
+  delete m_pixmapItem;
+  m_pixmapItem = nullptr;
+  this->fitInView(m_pixmap_bounding_rect, Qt::KeepAspectRatio);
+}
+
+void ImageWidget::startDrawROI() {
+  if (m_current_mode == IModeNone) {
+    // this->setCursor(Qt::CrossCursor);
+    m_scene->clearSelection();
+    changeInteractMode(IModeDrawing);
+  }
+}
+
+void ImageWidget::deletedSelectedItems() {
+  QList<QGraphicsItem*> selected_items = m_scene->selectedItems();
+  if (selected_items.empty()) {
+    return;
+  }
+
+  for (int idx=0;idx<selected_items.count();idx++) {
+    QGraphicsItem *item = selected_items[idx];
+    m_scene->removeItem(item);
+    delete item;
+  }
+}
+
+void ImageWidget::mousePressEvent(QMouseEvent *event) {
+  // custom handle mouse press event
+  switch (event->button()) {
+    case Qt::RightButton:
+      if (this->rightMouseButtonPressed(event)) {
+        return;
+      }
+      break;
+    case Qt::LeftButton:
+      if (this->leftMouseButtonPressed(event)) {
+        return;
+      }
+      break;
+    default:
+      break;
   }
 
   QGraphicsView::mousePressEvent(event);
 }
 
-void ImageWidget::mouseMoveEvent(QMouseEvent *event)
-{
-  if (m_panning) {
-    QPoint delta = event->pos() - m_lastPanPoint;
-    m_lastPanPoint = event->pos();
-    // move scrollbars (faster than manipulating transform directly)
-    horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
-    verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
-    return;
-  }
+void ImageWidget::mouseMoveEvent(QMouseEvent *event) {
+  switch (m_current_mode) {
+    case IModeNone:
 
-  if (m_mode == DrawRect && m_currentRect) {
-    QPointF scenePos = mapToSceneF(event->pos());
-    updateRect(scenePos);
-    return;
+      break;
+    case IModeZoom:
+
+      break;
+    case IModePan:
+    {
+      m_has_panned = true;
+      QPoint delta = event->pos() - m_last_pan_point;
+      if (!delta.isNull()) {
+        this->horizontalScrollBar()->setValue(
+            horizontalScrollBar()->value() - delta.x());
+        this->verticalScrollBar()->setValue(
+            verticalScrollBar()->value() - delta.y());
+        m_last_pan_point = event->pos();
+      }
+    }
+    break;
+    case IModeDrawing:
+      draw_updateROI(event);
+      return;
+      break;
   }
 
   QGraphicsView::mouseMoveEvent(event);
 }
 
-void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-  if (event->button() == Qt::MiddleButton) {
-    m_panning = false;
-    setCursor(isSpacePanning() ? Qt::OpenHandCursor : Qt::ArrowCursor);
-    event->accept();
-    return;
-  }
-  if (event->button() == Qt::LeftButton && m_panning) {
-    // was space+left panning
-    m_panning = false;
-    setCursor(isSpacePanning() ? Qt::OpenHandCursor : Qt::ArrowCursor);
-    event->accept();
-    return;
-  }
-
-  if (event->button() == Qt::LeftButton) {
-    if (m_mode == DrawRect && m_currentRect) {
-      finishRect();
-      event->accept();
-      return;
-    }
-  }
-
-  // right click can finish polygon
-  if (event->button() == Qt::RightButton && m_mode == DrawPolygon && !m_polygonPoints.isEmpty()) {
-    finishPolygon();
-    event->accept();
-    return;
+void ImageWidget::mouseReleaseEvent(QMouseEvent *event) {
+  // custom handle mouse release event
+  switch (event->button()) {
+    case Qt::RightButton:
+      if (this->rightMouseButtonReleased(event)) {
+        return;
+      }
+      break;
+    case Qt::LeftButton:
+      if (this->leftMouseButtonReleased(event)) {
+        return;
+      }
+      break;
+    default:
+      break;
   }
 
   QGraphicsView::mouseReleaseEvent(event);
 }
 
-void ImageWidget::keyPressEvent(QKeyEvent *event)
-{
-  if (event->key() == Qt::Key_Space) {
-    m_spacePressed = true;
-    if (!m_panning) setCursor(Qt::OpenHandCursor);
+void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event) {
+  switch (event->button()) {
+    case Qt::MiddleButton:
+      if (m_current_mode == IModeNone) {
+        this->fitInView(m_pixmap_bounding_rect, Qt::KeepAspectRatio);
+      }
+      break;
+    default:
+      break;
+  }
+
+  QGraphicsView::mouseDoubleClickEvent(event);
+}
+
+void ImageWidget::wheelEvent(QWheelEvent *event) {
+  if (event->modifiers() & Qt::ControlModifier) {
+    changeInteractMode(IModeZoom);
+    double angle = event->angleDelta().y();
+    double factor = (angle > 0) ? 1.15 : 0.85;
+    this->scale(factor, factor);
+    backToPreviousMode();
+    return;
+  }
+
+  QGraphicsView::wheelEvent(event);
+}
+
+void ImageWidget::keyPressEvent(QKeyEvent *event) {
+  if (event->key() == Qt::Key_Escape) {
+    m_roi_started = false;
+    draw_cancelROI();
+    changeInteractMode(IModeNone);
     event->accept();
-    return;
   }
 
-  // Finish polygon with Enter
-  if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) && m_mode == DrawPolygon) {
-    if (!m_polygonPoints.isEmpty()) {
-      finishPolygon();
-      return;
+  if (m_current_mode == IModeNone) {
+    switch (event->key()) {
+      case Qt::Key_Delete:
+        deletedSelectedItems();
+        event->accept();
+        break;
+
+      case Qt::Key_A:
+        startDrawROI();
+        event->accept();
+        break;
+
+      default:
+        break;
     }
-  }
-
-  // Undo vertex with Backspace
-  if (event->key() == Qt::Key_Backspace && m_mode == DrawPolygon) {
-    undoPolygonVertex();
-    return;
-  }
-
-  // Zoom by keys
-  if (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal) {
-    scaleView(m_zoomStep);
-    return;
-  }
-  if (event->key() == Qt::Key_Minus) {
-    scaleView(1.0 / m_zoomStep);
-    return;
   }
 
   QGraphicsView::keyPressEvent(event);
 }
 
-void ImageWidget::keyReleaseEvent(QKeyEvent *event)
-{
-  if (event->key() == Qt::Key_Space) {
-    m_spacePressed = false;
-    if (!m_panning) setCursor(Qt::ArrowCursor);
+void ImageWidget::keyReleaseEvent(QKeyEvent *event) {
+  if ((event->key() == Qt::Key_Control) && (m_current_mode == IModePan)) {
+    m_last_pan_point = QPoint();
+    // this->setCursor(Qt::ArrowCursor);
+    changeInteractMode(IModeNone);
     event->accept();
-    return;
+    // return;
   }
+
   QGraphicsView::keyReleaseEvent(event);
 }
 
-void ImageWidget::resizeEvent(QResizeEvent *event)
-{
-  QGraphicsView::resizeEvent(event);
-  // optional: keep fit-to-window when resizing (uncomment if desired)
-  // fitImage();
+void ImageWidget::changeInteractMode(InteractMode mode) {
+  if (mode != m_current_mode) {
+    m_previous_mode = m_current_mode;
+    m_current_mode = mode;
+    changeCursor();
+    m_scene_interacting = (m_current_mode != IModeNone) ? true : false;
+
+    // PRINT_DEBUG_INFO("[IMG ROI Widget] Chang mode:"
+    //          << interactMode2String(m_previous_mode)
+    //          << ">>"
+    //          << interactMode2String(m_current_mode));
+  }
 }
 
-// ---------- drawing helpers ----------
-
-void ImageWidget::startRect(const QPointF &scenePos)
-{
-  cancelCurrentDrawing();
-  m_rectStartScene = scenePos;
-  m_currentRect = m_scene->addRect(QRectF(m_rectStartScene, QSizeF(0,0)));
-  m_currentRect->setPen(QPen(Qt::red, 1.5));
-  m_currentRect->setBrush(QBrush(QColor(255,0,0,30)));
-  m_currentRect->setZValue(10);
-}
-
-void ImageWidget::updateRect(const QPointF &scenePos)
-{
-  if (!m_currentRect) return;
-  QRectF r(m_rectStartScene, scenePos);
-  r = r.normalized();
-  m_currentRect->setRect(r);
-}
-
-void ImageWidget::finishRect()
-{
-  if (!m_currentRect) return;
-  QRectF r = m_currentRect->rect();
-  // Emit and keep item (or remove it, depending on design)
-  // Here we keep the item but make it selectable.
-  m_currentRect->setFlag(QGraphicsItem::ItemIsSelectable, true);
-  m_currentRect->setFlag(QGraphicsItem::ItemIsMovable, true);
-  m_currentRect->setZValue(5);
-  emit roiRectFinished(r);
-  m_currentRect = nullptr; // allow next rect creation
-}
-
-void ImageWidget::startPolygon(const QPointF &scenePos)
-{
-  cancelCurrentDrawing(); // ensure clean
-  m_polygonPoints.clear();
-  m_polygonPreview = m_scene->addPolygon(QPolygonF(), QPen(Qt::green, 1.5), QBrush(QColor(0,255,0,40)));
-  m_polygonPreview->setZValue(10);
-  addPolygonVertex(scenePos);
-}
-
-void ImageWidget::addPolygonVertex(const QPointF &scenePos)
-{
-  if (!m_polygonPreview) {
-    startPolygon(scenePos);
+void ImageWidget::backToPreviousMode() {
+  if (m_previous_mode == m_current_mode) {
     return;
   }
-  m_polygonPoints.append(scenePos);
-  updatePolygonPreview();
+
+  InteractMode temp_mode = m_current_mode;
+  m_current_mode = m_previous_mode;
+  m_previous_mode = temp_mode;
+  changeCursor();
+  m_scene_interacting = (m_current_mode != IModeNone) ? true : false;
+
+  // PRINT_DEBUG_INFO("[IMG ROI Widget] Chang mode (back):"
+  //          << interactMode2String(m_previous_mode)
+  //          << ">>"
+  //          << interactMode2String(m_current_mode));
 }
 
-void ImageWidget::updatePolygonPreview()
-{
-  if (!m_polygonPreview) return;
-  m_polygonPreview->setPolygon(m_polygonPoints);
-}
+void ImageWidget::changeCursor() {
+  switch (m_current_mode) {
+    case IModeNone:
+      this->setCursor(Qt::ArrowCursor);
+      break;
+    case IModeZoom:
 
-void ImageWidget::finishPolygon()
-{
-  if (!m_polygonPreview) return;
-  // Optionally close polygon if more than 2 points
-  if (m_polygonPoints.size() >= 3) {
-    QGraphicsPolygonItem *finalItem = new QGraphicsPolygonItem(m_polygonPoints);
-    finalItem->setPen(QPen(Qt::blue, 1.5));
-    finalItem->setBrush(QBrush(QColor(0,0,255,40)));
-    finalItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
-    finalItem->setFlag(QGraphicsItem::ItemIsMovable, true);
-    finalItem->setZValue(5);
-    m_scene->addItem(finalItem);
-    emit polygonFinished(m_polygonPoints);
-  }
-  // remove preview
-  m_scene->removeItem(m_polygonPreview);
-  delete m_polygonPreview;
-  m_polygonPreview = nullptr;
-  m_polygonPoints.clear();
-}
-
-void ImageWidget::cancelCurrentDrawing()
-{
-  if (m_currentRect) {
-    m_scene->removeItem(m_currentRect);
-    delete m_currentRect;
-    m_currentRect = nullptr;
-  }
-  if (m_polygonPreview) {
-    m_scene->removeItem(m_polygonPreview);
-    delete m_polygonPreview;
-    m_polygonPreview = nullptr;
-    m_polygonPoints.clear();
+      break;
+    case IModePan:
+      this->setCursor(Qt::ClosedHandCursor);
+      break;
+    case IModeDrawing:
+      this->setCursor(Qt::CrossCursor);
+      break;
   }
 }
 
-void ImageWidget::scaleView(qreal factor)
-{
-  // constrain zoom
-  qreal newScale = m_zoomFactor * factor;
-  if (newScale < m_minZoom || newScale > m_maxZoom) return;
-  scale(factor, factor);
-  m_zoomFactor = newScale;
+void ImageWidget::init_mouse_menu() {
+  action_add_roi = new QAction("Add ROI", this);
+  action_delete_roi = new QAction("Delete selected ROIs", this);
+  action_save_roi = new QAction("Save ROIs", this);
+  action_load_img = new QAction("Load Image", this);
+  action_remove_img = new QAction("Remove Image", this);
+  action_reset_img = new QAction("Reset transform", this);
+
+  menu_right_mouse = new QMenu();
+  menu_right_mouse->addAction(action_load_img);
+
+  menu_right_mouse_full = new QMenu();
+  menu_right_mouse_full->addAction(action_add_roi);
+  menu_right_mouse_full->addAction(action_load_img);
+  menu_right_mouse_full->addAction(action_remove_img);
+  menu_right_mouse_full->addAction(action_reset_img);
+
+  menu_right_mouse_roi = new QMenu();
+  menu_right_mouse_roi->addAction(action_save_roi);
+  menu_right_mouse_roi->addAction(action_delete_roi);
+}
+
+void ImageWidget::createPixmapItem(QPixmap &pixmap) {
+  m_pixmapItem = new PixmapBoundingLine(pixmap);
+  m_pixmapItem->setBorderLineWidth(4);
+  m_pixmapItem->setBorderColor(QColor(Qt::green));
+  m_scene->addItem(m_pixmapItem);
+}
+
+bool ImageWidget::hadImage() {
+  return (m_pixmapItem != nullptr);
+}
+
+QString ImageWidget::interactMode2String(InteractMode mode) {
+  switch (mode) {
+    case IModeNone:
+      return "None";
+    case IModeZoom:
+      return "Zoom";
+    case IModePan:
+      return "Pan";
+    case IModeDrawing:
+      return "Drawing";
+  }
+  return "Unknown";
+}
+
+bool ImageWidget::rightMouseButtonPressed(QMouseEvent *event) {
+  return false;
+}
+
+bool ImageWidget::leftMouseButtonPressed(QMouseEvent *event) {
+  if ((event->modifiers() & Qt::ControlModifier) && (!m_roi_started)) {
+    m_has_panned = false;
+    m_last_pan_point = event->pos();
+    changeInteractMode(IModePan);
+    return false;
+  }
+
+  if (m_current_mode == IModeDrawing) {
+    if (event->modifiers() != Qt::NoModifier) {
+      return false;
+    }
+
+    if (!m_roi_started) {
+      return draw_startROI(event);
+    } else {
+      return draw_endROI(event);
+    }
+  }
+
+  return false;
+}
+
+bool ImageWidget::rightMouseButtonReleased(QMouseEvent *event) {
+  if (m_using_mouse_menu) {
+    showRightMouseClickMenu(event);
+  }
+  return false;
+}
+
+bool ImageWidget::leftMouseButtonReleased(QMouseEvent *event) {
+  switch (m_current_mode) {
+    case IModeNone:
+    {
+
+    }
+    break;
+    case IModeZoom:
+
+      break;
+    case IModePan:
+    {
+      m_last_pan_point = QPoint();
+      backToPreviousMode();
+      if (m_has_panned) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    break;
+    case IModeDrawing:
+
+      break;
+    default:
+      break;
+  }
+
+  return false;
+}
+
+void ImageWidget::showRightMouseClickMenu(QMouseEvent *event) {
+  QMenu *showMenu = nullptr;
+
+  if (!m_scene->selectedItems().empty()) {
+    showMenu = menu_right_mouse_roi;
+  } else {
+    if (hadImage()) {
+      showMenu = menu_right_mouse_full;
+    } else {
+      showMenu = menu_right_mouse;
+    }
+  }
+
+  QAction *selectedAction = showMenu->exec(event->globalPosition().toPoint());
+
+  if (selectedAction == action_add_roi) {
+    PRINT_DEBUG_INFO("[IMG ROI Widget] User choose add new ROI from mouse event.");
+    startDrawROI();
+
+  } else if (selectedAction == action_delete_roi) {
+    deletedSelectedItems();
+    PRINT_DEBUG_INFO("[IMG ROI Widget] User choose delete selected ROIs from mouse event.");
+
+  } else if (selectedAction == action_save_roi) {
+    // deletedSelectedItems();
+    PRINT_DEBUG_INFO("[IMG ROI Widget] User choose save selected ROIs from mouse event.");
+
+    QPointF scene_pos = mapToScene(event->pos());
+    QGraphicsItem *item = this->scene()->itemAt(scene_pos, QTransform());
+    // PRINT_DEBUG_INFO(item->type());
+
+    if (item) {
+      ItemRoi *roi_item = ((ItemRoi*)item);
+      if (m_scene->selectedItems().contains(item)) {
+        // PRINT_DEBUG_INFO("User clicked at item:"
+        //          << roi_item->rect().topLeft()
+        //          << roi_item->rect().bottomRight());
+
+        const QPixmap &pixmap = m_pixmapItem->pixmap();
+
+        QRectF save_rect = roi_item->getRoi();
+        // QRectF roiInPixmapItem = m_pixmapItem->mapFromScene(save_rect).boundingRect();
+        QRect roi = save_rect.toAlignedRect();
+        roi = roi.intersected(pixmap.rect());
+        if (roi.isEmpty())
+          return;
+
+        QPixmap cropped = pixmap.copy(roi);
+
+        if (m_setting == nullptr) {
+          m_setting = new QSettings("DGB", "Image widget");
+        }
+
+        QString lastDirectory = m_setting->value("lastDirectory", "").toString();
+
+        QString filePath = QFileDialog::getSaveFileName(this,
+                                                        "Save image",
+                                                        lastDirectory,
+                                                        "Image Files (*.png *.jpg *.jpeg *.bmp)");
+
+        if (!filePath.isEmpty()) {
+          QString directory = QFileInfo(filePath).absolutePath();
+          m_setting->setValue("lastDirectory", directory);
+
+          cropped.save(filePath, "bmp");
+        }
+      }
+    }
+
+  } else if (selectedAction == action_load_img) {
+    PRINT_DEBUG_INFO("[IMG ROI Widget] User choose load image from mouse event.");
+    showChooseImageDialog();
+
+  } else if (selectedAction == action_remove_img) {
+    PRINT_DEBUG_INFO("[IMG ROI Widget] User choose remove image from mouse event.");
+    this->removeImage();
+
+  } else if (selectedAction == action_reset_img) {
+    PRINT_DEBUG_INFO("[IMG ROI Widget] User choose reset image transform from mouse event.");
+
+    if (!hadImage()) {
+      PRINT_DEBUG_INFO("[IMG ROI Widget] Rest transform fail, image empty.");
+      return;
+    }
+    this->fitInView(m_pixmap_bounding_rect, Qt::KeepAspectRatio);
+  }
+}
+
+void ImageWidget::showChooseImageDialog() {
+  if (m_setting == nullptr) {
+    m_setting = new QSettings("DGB", "Image widget");
+  }
+
+  QString lastDirectory = m_setting->value("lastDirectory", "").toString();
+
+  QString filePath = QFileDialog::getOpenFileName(this,
+                                                  "Choose image",
+                                                  lastDirectory,
+                                                  "Image Files (*.png *.jpg *.jpeg *.bmp)");
+
+  if (!filePath.isEmpty()) {
+    QString directory = QFileInfo(filePath).absolutePath();
+    m_setting->setValue("lastDirectory", directory);
+
+    loadImage(filePath);
+  }
+}
+
+bool ImageWidget::draw_startROI(QMouseEvent *event) {
+  if (!m_pixmapItem->contains(mapToScene(event->pos()))) {
+    return false;
+  }
+
+  if (!m_roi_started) {
+    m_roi_started = true;
+    setMouseTracking(true);
+
+    PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: first point marked.");
+
+    m_roi_start_point = mapToScene(event->pos());
+    m_temp_roi = new QGraphicsRectItem();
+    m_temp_roi->setPen(QPen(Qt::red, 2, Qt::DashLine));
+    m_temp_roi->setBrush(QBrush(Qt::transparent));
+    m_temp_roi->setRect(QRectF(m_roi_start_point, QSizeF(0, 0)));
+
+    if (this->scene()) {
+      this->scene()->addItem(m_temp_roi);
+    }
+    return true;
+  }
+  return false;
+}
+
+bool ImageWidget::draw_endROI(QMouseEvent *event) {
+  if (!m_pixmapItem->contains(mapToScene(event->pos()))) {
+    return false;
+  }
+
+  m_roi_started = false;
+  setMouseTracking(false);
+
+  if (this->mapToScene(event->pos()) == m_roi_start_point) {
+    this->scene()->removeItem(m_temp_roi);
+    m_temp_roi = nullptr;
+    return true;
+  }
+
+
+  if (this->scene()) {
+    temp_editable_roi = new ItemRoi(m_temp_roi->rect(),
+                                           this->m_pixmapItem,
+                                           &m_scene_interacting);
+    QPointF temp_pos = m_temp_roi->pos();
+    this->scene()->removeItem(m_temp_roi);
+    m_temp_roi = nullptr;
+
+    if ((temp_editable_roi->rect().width() < 10) ||
+        (temp_editable_roi->rect().height() < 10)) {
+      this->scene()->removeItem(temp_editable_roi);
+      PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: failed, ROI to small.");
+    } else {
+      temp_editable_roi->setPos(temp_pos);
+      emit signal_draw_roi_finished(temp_editable_roi);
+      PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: finished.");
+    }
+  }
+
+  changeInteractMode(IModeNone);
+  return true;
+}
+
+void ImageWidget::draw_updateROI(QMouseEvent *event) {
+  if (!m_pixmapItem->contains(mapToScene(event->pos()))) {
+    return;
+  }
+
+  QPointF currentPos = mapToScene(event->pos());
+  QRectF newRect(m_roi_start_point, currentPos);
+
+  newRect = newRect.normalized();
+  m_temp_roi->setRect(newRect);
+  PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: change position." << newRect);
+}
+
+void ImageWidget::draw_cancelROI() {
+  m_roi_started = false;
+  setMouseTracking(false);
+  this->scene()->removeItem(m_temp_roi);
+  m_temp_roi = nullptr;
 }

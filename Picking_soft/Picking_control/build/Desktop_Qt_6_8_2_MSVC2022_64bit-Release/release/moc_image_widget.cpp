@@ -38,18 +38,17 @@ struct qt_meta_tag_ZN11ImageWidgetE_t {};
 #ifdef QT_MOC_HAS_STRINGDATA
 static constexpr auto qt_meta_stringdata_ZN11ImageWidgetE = QtMocHelpers::stringData(
     "ImageWidget",
-    "roiRectFinished",
+    "signal_draw_roi_finished",
     "",
-    "rect",
-    "polygonFinished",
-    "poly",
-    "drawingCanceled",
-    "cancelDrawing",
-    "undoPolygonVertex",
-    "InteractionMode",
-    "Navigate",
-    "DrawRect",
-    "DrawPolygon"
+    "ItemRoi*",
+    "roi",
+    "loadImage",
+    "filePath",
+    "QPixmap&",
+    "pixmap",
+    "removeImage",
+    "startDrawROI",
+    "deletedSelectedItems"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -61,38 +60,32 @@ Q_CONSTINIT static const uint qt_meta_data_ZN11ImageWidgetE[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       6,   14, // methods
        0,    0, // properties
-       1,   53, // enums/sets
+       0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       3,       // signalCount
+       1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    1,   44,    2, 0x06,    2 /* Public */,
-       4,    1,   47,    2, 0x06,    4 /* Public */,
-       6,    0,   50,    2, 0x06,    6 /* Public */,
+       1,    1,   50,    2, 0x06,    1 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       7,    0,   51,    2, 0x0a,    7 /* Public */,
-       8,    0,   52,    2, 0x0a,    8 /* Public */,
+       5,    1,   53,    2, 0x0a,    3 /* Public */,
+       5,    1,   56,    2, 0x0a,    5 /* Public */,
+       9,    0,   59,    2, 0x0a,    7 /* Public */,
+      10,    0,   60,    2, 0x0a,    8 /* Public */,
+      11,    0,   61,    2, 0x0a,    9 /* Public */,
 
  // signals: parameters
-    QMetaType::Void, QMetaType::QRectF,    3,
-    QMetaType::Void, QMetaType::QPolygonF,    5,
-    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 3,    4,
 
  // slots: parameters
+    QMetaType::Void, QMetaType::QString,    6,
+    QMetaType::Void, 0x80000000 | 7,    8,
     QMetaType::Void,
     QMetaType::Void,
-
- // enums: name, alias, flags, count, data
-       9,    9, 0x0,    3,   58,
-
- // enum data: key, value
-      10, uint(ImageWidget::Navigate),
-      11, uint(ImageWidget::DrawRect),
-      12, uint(ImageWidget::DrawPolygon),
+    QMetaType::Void,
 
        0        // eod
 };
@@ -104,21 +97,22 @@ Q_CONSTINIT const QMetaObject ImageWidget::staticMetaObject = { {
     qt_static_metacall,
     nullptr,
     qt_incomplete_metaTypeArray<qt_meta_tag_ZN11ImageWidgetE_t,
-        // enum 'InteractionMode'
-        QtPrivate::TypeAndForceComplete<ImageWidget::InteractionMode, std::true_type>,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<ImageWidget, std::true_type>,
-        // method 'roiRectFinished'
+        // method 'signal_draw_roi_finished'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<const QRectF &, std::false_type>,
-        // method 'polygonFinished'
+        QtPrivate::TypeAndForceComplete<ItemRoi *, std::false_type>,
+        // method 'loadImage'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<const QPolygonF &, std::false_type>,
-        // method 'drawingCanceled'
+        QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
+        // method 'loadImage'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'cancelDrawing'
+        QtPrivate::TypeAndForceComplete<QPixmap &, std::false_type>,
+        // method 'removeImage'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'undoPolygonVertex'
+        // method 'startDrawROI'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'deletedSelectedItems'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -129,34 +123,21 @@ void ImageWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
     auto *_t = static_cast<ImageWidget *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->roiRectFinished((*reinterpret_cast< std::add_pointer_t<QRectF>>(_a[1]))); break;
-        case 1: _t->polygonFinished((*reinterpret_cast< std::add_pointer_t<QPolygonF>>(_a[1]))); break;
-        case 2: _t->drawingCanceled(); break;
-        case 3: _t->cancelDrawing(); break;
-        case 4: _t->undoPolygonVertex(); break;
+        case 0: _t->signal_draw_roi_finished((*reinterpret_cast< std::add_pointer_t<ItemRoi*>>(_a[1]))); break;
+        case 1: _t->loadImage((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 2: _t->loadImage((*reinterpret_cast< std::add_pointer_t<QPixmap&>>(_a[1]))); break;
+        case 3: _t->removeImage(); break;
+        case 4: _t->startDrawROI(); break;
+        case 5: _t->deletedSelectedItems(); break;
         default: ;
         }
     }
     if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            using _q_method_type = void (ImageWidget::*)(const QRectF & );
-            if (_q_method_type _q_method = &ImageWidget::roiRectFinished; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
+            using _q_method_type = void (ImageWidget::*)(ItemRoi * );
+            if (_q_method_type _q_method = &ImageWidget::signal_draw_roi_finished; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
                 *result = 0;
-                return;
-            }
-        }
-        {
-            using _q_method_type = void (ImageWidget::*)(const QPolygonF & );
-            if (_q_method_type _q_method = &ImageWidget::polygonFinished; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
-                *result = 1;
-                return;
-            }
-        }
-        {
-            using _q_method_type = void (ImageWidget::*)();
-            if (_q_method_type _q_method = &ImageWidget::drawingCanceled; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
-                *result = 2;
                 return;
             }
         }
@@ -182,35 +163,22 @@ int ImageWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 6;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 6)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }
 
 // SIGNAL 0
-void ImageWidget::roiRectFinished(const QRectF & _t1)
+void ImageWidget::signal_draw_roi_finished(ItemRoi * _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
-}
-
-// SIGNAL 1
-void ImageWidget::polygonFinished(const QPolygonF & _t1)
-{
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
-    QMetaObject::activate(this, &staticMetaObject, 1, _a);
-}
-
-// SIGNAL 2
-void ImageWidget::drawingCanceled()
-{
-    QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
 }
 QT_WARNING_POP
