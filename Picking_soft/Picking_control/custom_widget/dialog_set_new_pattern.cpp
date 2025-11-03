@@ -54,7 +54,17 @@ DialogSetNewPattern::DialogSetNewPattern(
   connect(form_crop_image->graphics_view, &ImageWidget::signal_draw_roi_finished,
           this, &DialogSetNewPattern::form_draw_crop_roi_finished);
 
-  this->setModal(false);
+  connect(form_picking_pos->dspb_angle, &QDoubleSpinBox::editingFinished,
+          this, &DialogSetNewPattern::form_picking_angle_edited);
+
+  ui->btn_cancel->setDefault(false);
+  ui->btn_cancel->setAutoDefault(false);
+  ui->btn_next->setDefault(false);
+  ui->btn_next->setAutoDefault(false);
+  ui->btn_back->setDefault(false);
+  ui->btn_back->setAutoDefault(false);
+
+  // this->setModal(false);
 }
 
 DialogSetNewPattern::~DialogSetNewPattern() {
@@ -98,7 +108,6 @@ void DialogSetNewPattern::btn_form_choose_image_clicked() {
   form_crop_image->btn_set_roi->setEnabled(
       (form_crop_image->graphics_view->hadImage()) &&
       (m_item_crop_roi == nullptr));
-
 }
 
 void DialogSetNewPattern::btn_form_trigger_clicked() {
@@ -106,7 +115,7 @@ void DialogSetNewPattern::btn_form_trigger_clicked() {
 }
 
 void DialogSetNewPattern::btn_form_set_roi_clicked() {
-  form_crop_image->graphics_view->startDrawROI();
+  form_crop_image->graphics_view->startDrawROI(ImageWidget::NormalROI);
 }
 
 void DialogSetNewPattern::btn_form_clear_roi_clicked() {
@@ -119,7 +128,8 @@ void DialogSetNewPattern::btn_form_clear_roi_clicked() {
   m_item_crop_roi = nullptr;
 }
 
-void DialogSetNewPattern::form_draw_crop_roi_finished(ItemRoi *roi) {
+void DialogSetNewPattern::form_draw_crop_roi_finished(QGraphicsItem *roi,
+                                                      ImageWidget::ItemAddType type) {
   if (roi == nullptr) {
     return;
   }
@@ -127,7 +137,24 @@ void DialogSetNewPattern::form_draw_crop_roi_finished(ItemRoi *roi) {
   ui->btn_next->setEnabled(true);
   form_crop_image->btn_set_roi->setEnabled(false);
   form_crop_image->btn_clear_roi->setEnabled(true);
-  m_item_crop_roi = roi;
+  m_item_crop_roi = dynamic_cast<ItemRoi*>(roi);
+  // m_item_crop_roi->setFlag(QGraphicsItem::ItemIsMovable, false);
+  // m_item_crop_roi->setFlag(QGraphicsItem::ItemIsSelectable, false);
+}
+
+void DialogSetNewPattern::form_picking_pos_changed(QPointF point) {
+  form_picking_pos->dspb_X->setValue(point.x());
+  form_picking_pos->dspb_Y->setValue(point.y());
+}
+
+void DialogSetNewPattern::form_picking_angle_changed(qreal angle) {
+  form_picking_pos->dspb_angle->setValue(angle);
+}
+
+void DialogSetNewPattern::form_picking_angle_edited() {
+  if (m_item_crop_roi != nullptr) {
+    m_item_crop_roi->setRotation(form_picking_pos->dspb_angle->value());
+  }
 }
 
 void DialogSetNewPattern::set_current_step_wg() {
@@ -141,6 +168,23 @@ void DialogSetNewPattern::set_current_step_wg() {
       m_item_cropped_pixmap = form_crop_image->graphics_view->getCroppedFromRoi
                               (m_item_crop_roi);
       form_picking_pos->graphics_view->loadImage(m_item_cropped_pixmap);
+
+      if (m_item_picking_center == nullptr) {
+        m_item_picking_center = new ItemPickingCenter(form_picking_pos->graphics_view->getPixmapItem());
+        form_picking_pos->graphics_view->scene()->addItem(m_item_picking_center);
+        connect(m_item_picking_center, &ItemPickingCenter::positionChanged,
+                this, &DialogSetNewPattern::form_picking_pos_changed);
+        connect(m_item_picking_center, &ItemPickingCenter::angleChanged,
+                this, &DialogSetNewPattern::form_picking_angle_changed);
+      }
+
+      const QGraphicsPixmapItem *px_item = form_picking_pos->graphics_view->getPixmapItem();
+      m_item_picking_center->setPos(px_item->boundingRect().center());
       break;
+
+    // case 2:
+    //   // const QGraphicsPixmapItem *px_item = form_picking_pos->graphics_view->getPixmapItem();
+    //   // m_item_picking_center->setPos(px_item->boundingRect().center());
+    //   break;
   }
 }

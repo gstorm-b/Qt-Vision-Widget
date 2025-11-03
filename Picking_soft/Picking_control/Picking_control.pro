@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     custom_widget/dialog_set_new_pattern.cpp \
     custom_widget/image_widget.cpp \
+    custom_widget/item_picking_pos.cpp \
     custom_widget/item_roi_rotated.cpp \
     custom_widget/item_roi.cpp \
     custom_widget/robot/command.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     custom_widget/dialog_set_new_pattern.h \
     custom_widget/icon_button.h \
     custom_widget/image_widget.h \
+    custom_widget/item_picking_pos.h \
     custom_widget/item_pixmap_bounding.h \
     custom_widget/item_roi_rotated.h \
     custom_widget/item_roi.h \

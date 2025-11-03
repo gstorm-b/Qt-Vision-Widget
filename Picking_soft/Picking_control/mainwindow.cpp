@@ -110,7 +110,7 @@ void MainWindow::CommandClicked(rp::Command* cmd) {
 }
 
 void MainWindow::btn_set_roi_clicked() {
-  ui->graphicsView_main->startDrawROI();
+  ui->graphicsView_main->startDrawROI(ImageWidget::RotatedROI);
 }
 
 void MainWindow::btn_set_polygon_clicked() {

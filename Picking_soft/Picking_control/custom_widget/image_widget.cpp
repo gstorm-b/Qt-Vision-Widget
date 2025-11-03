@@ -142,11 +142,12 @@ void ImageWidget::removeImage() {
   this->fitInView(m_pixmap_bounding_rect, Qt::KeepAspectRatio);
 }
 
-void ImageWidget::startDrawROI() {
+void ImageWidget::startDrawROI(ImageWidget::ItemAddType roi_type) {
   if (m_current_mode == IModeNone) {
     // this->setCursor(Qt::CrossCursor);
     m_scene->clearSelection();
     changeInteractMode(IModeDrawing);
+    m_draw_roi_type = roi_type;
   }
 }
 
@@ -276,8 +277,8 @@ void ImageWidget::keyPressEvent(QKeyEvent *event) {
         break;
 
       case Qt::Key_A:
-        startDrawROI();
-        event->accept();
+        // startDrawROI();
+        // event->accept();
         break;
 
       default:
@@ -371,14 +372,19 @@ void ImageWidget::init_mouse_menu() {
 }
 
 void ImageWidget::createPixmapItem(QPixmap &pixmap) {
-  m_pixmapItem = new PixmapBoundingLine(pixmap);
-  m_pixmapItem->setBorderLineWidth(4);
-  m_pixmapItem->setBorderColor(QColor(Qt::green));
+  // m_pixmapItem = new PixmapBoundingLine(pixmap);
+  m_pixmapItem = new QGraphicsPixmapItem(pixmap);
+  // m_pixmapItem->setBorderLineWidth(4);
+  // m_pixmapItem->setBorderColor(QColor(Qt::green));
   m_scene->addItem(m_pixmapItem);
 }
 
 bool ImageWidget::hadImage() {
   return (m_pixmapItem != nullptr);
+}
+
+QGraphicsPixmapItem* ImageWidget::getPixmapItem() {
+  return m_pixmapItem;
 }
 
 QString ImageWidget::interactMode2String(InteractMode mode) {
@@ -477,7 +483,7 @@ void ImageWidget::showRightMouseClickMenu(QMouseEvent *event) {
 
   if (selectedAction == action_add_roi) {
     PRINT_DEBUG_INFO("[IMG ROI Widget] User choose add new ROI from mouse event.");
-    startDrawROI();
+    startDrawROI(ItemAddType::RotatedROI);
 
   } else if (selectedAction == action_delete_roi) {
     deletedSelectedItems();
@@ -489,19 +495,13 @@ void ImageWidget::showRightMouseClickMenu(QMouseEvent *event) {
 
     QPointF scene_pos = mapToScene(event->pos());
     QGraphicsItem *item = this->scene()->itemAt(scene_pos, QTransform());
-    // PRINT_DEBUG_INFO(item->type());
 
     if (item) {
       ItemRoi *roi_item = ((ItemRoi*)item);
       if (m_scene->selectedItems().contains(item)) {
-        // PRINT_DEBUG_INFO("User clicked at item:"
-        //          << roi_item->rect().topLeft()
-        //          << roi_item->rect().bottomRight());
-
         const QPixmap &pixmap = m_pixmapItem->pixmap();
 
         QRectF save_rect = roi_item->getRoi();
-        // QRectF roiInPixmapItem = m_pixmapItem->mapFromScene(save_rect).boundingRect();
         QRect roi = save_rect.toAlignedRect();
         roi = roi.intersected(pixmap.rect());
         if (roi.isEmpty())
@@ -609,22 +609,50 @@ bool ImageWidget::draw_endROI(QMouseEvent *event) {
 
 
   if (this->scene()) {
-    temp_editable_roi = new ItemRoi(m_temp_roi->rect(),
-                                           this->m_pixmapItem,
-                                           &m_scene_interacting);
-    QPointF temp_pos = m_temp_roi->pos();
-    this->scene()->removeItem(m_temp_roi);
-    m_temp_roi = nullptr;
+    switch (m_draw_roi_type) {
+      case ItemAddType::NormalROI:
+      {
+        ItemRoi *new_roi = new ItemRoi(m_temp_roi->rect(),
+                                       this->m_pixmapItem,
+                                       &m_scene_interacting);
+        QPointF temp_pos = m_temp_roi->pos();
+        this->scene()->removeItem(m_temp_roi);
+        m_temp_roi = nullptr;
 
-    if ((temp_editable_roi->rect().width() < 10) ||
-        (temp_editable_roi->rect().height() < 10)) {
-      this->scene()->removeItem(temp_editable_roi);
-      PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: failed, ROI to small.");
-    } else {
-      temp_editable_roi->setPos(temp_pos);
-      emit signal_draw_roi_finished(temp_editable_roi);
-      PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: finished.");
+        if ((new_roi->rect().width() < 10) ||
+            (new_roi->rect().height() < 10)) {
+          this->scene()->removeItem(new_roi);
+          PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: failed, ROI to small.");
+        } else {
+          new_roi->setPos(temp_pos);
+          emit signal_draw_roi_finished(new_roi, m_draw_roi_type);
+          PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: finished.");
+        }
+      }
+        break;
+      case ItemAddType::RotatedROI:
+      {
+        ItemRoiRotated *new_roi = new ItemRoiRotated(m_temp_roi->rect(),
+                                                     this->m_pixmapItem,
+                                                     &m_scene_interacting);
+        QPointF temp_pos = m_temp_roi->pos();
+        this->scene()->removeItem(m_temp_roi);
+        m_temp_roi = nullptr;
+
+        if ((new_roi->rect().width() < 10) ||
+            (new_roi->rect().height() < 10)) {
+          this->scene()->removeItem(new_roi);
+          PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: failed, ROI to small.");
+        } else {
+          new_roi->setPos(temp_pos);
+          emit signal_draw_roi_finished(new_roi, m_draw_roi_type);
+          PRINT_DEBUG_INFO("[IMG ROI Widget] Add new ROI: finished.");
+        }
+      }
+        break;
     }
+
+
   }
 
   changeInteractMode(IModeNone);

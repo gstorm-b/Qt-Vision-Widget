@@ -24,6 +24,7 @@
 #include "custom_widget/item_roi.h"
 #include "custom_widget/item_roi_rotated.h"
 
+
 class ImageWidget : public QGraphicsView {
   Q_OBJECT
 
@@ -33,6 +34,12 @@ public:
     IModeZoom,
     IModePan,
     IModeDrawing
+  };
+
+  enum ItemAddType {
+    NormalROI,
+    RotatedROI,
+    PickingPosition
   };
 
   explicit ImageWidget(QWidget *parent = nullptr);
@@ -45,16 +52,17 @@ public:
   const bool isUseMouseMenu();
   void showChooseImageDialog();
   bool hadImage();
+  QGraphicsPixmapItem* getPixmapItem();
 
 public slots:
   void loadImage(const QString &filePath);
   void loadImage(QPixmap &pixmap);
   void removeImage();
-  void startDrawROI();
+  void startDrawROI(ItemAddType roi_type);
   void deletedSelectedItems();
 
 signals:
-  void signal_draw_roi_finished(ItemRoi *roi);
+  void signal_draw_roi_finished(QGraphicsItem *roi, ItemAddType type);
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;
@@ -88,7 +96,7 @@ private:
 
 private:
   QGraphicsScene *m_scene;
-  PixmapBoundingLine *m_pixmapItem;
+  QGraphicsPixmapItem  *m_pixmapItem;
   QRectF m_pixmap_bounding_rect;
 
   QSettings *m_setting;
@@ -106,7 +114,8 @@ private:
   bool m_roi_started;
   QGraphicsRectItem *m_temp_roi;
   QPointF m_roi_start_point;
-  ItemRoi *temp_editable_roi;
+  // ItemRoi *temp_editable_roi;
+  ItemAddType m_draw_roi_type;
 
   /// Right Click Menu
   QMenu *menu_right_mouse;

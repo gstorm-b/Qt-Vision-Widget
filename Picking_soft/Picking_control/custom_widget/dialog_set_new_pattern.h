@@ -5,7 +5,9 @@
 #include <QWidget>
 #include <QMap>
 
+#include "custom_widget/image_widget.h"
 #include "custom_widget/item_roi.h"
+#include "custom_widget/item_picking_pos.h"
 
 namespace Ui { class DialogSetNewPattern;
                 class FormPatternCropImage;
@@ -28,7 +30,11 @@ private:
   void btn_form_trigger_clicked();
   void btn_form_set_roi_clicked();
   void btn_form_clear_roi_clicked();
-  void form_draw_crop_roi_finished(ItemRoi *roi);
+  void form_draw_crop_roi_finished(QGraphicsItem *roi, ImageWidget::ItemAddType typee);
+
+  void form_picking_pos_changed(QPointF point);
+  void form_picking_angle_changed(qreal angle);
+  void form_picking_angle_edited();
 
 private:
   void set_current_step_wg();
@@ -45,10 +51,12 @@ private:
   QMap<int, QString> m_wg_title_map;
   int m_current_step;
 
-  // step 1
+  // step 1 crop pattern
   bool m_has_image;
   ItemRoi *m_item_crop_roi{nullptr};
   QPixmap m_item_cropped_pixmap;
+  // step 2 set picking position
+  ItemPickingCenter *m_item_picking_center{nullptr};
 };
 
 #endif // DIALOG_SET_NEW_PATTERN_H
