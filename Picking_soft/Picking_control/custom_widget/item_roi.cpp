@@ -16,7 +16,7 @@ ItemRoi::ItemRoi(const QRectF &rect,
   m_bounding_color_normal = QColor(0xEC5228);
   m_bounding_color_selected = QColor(0xC68EFD);
 
-  m_handle_size = 20.0;
+  m_handle_size = 10.0;
   this->setTransformOriginPoint(rect.center());
 }
 
@@ -259,12 +259,12 @@ void ItemRoi::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     }
 
     // make sure new rect always large than limited rect
-    if (newRect.width() < m_handle_size*2) {
+    if (newRect.width() < m_handle_size) {
       event->accept();
       return;
     }
 
-    if (newRect.height() < m_handle_size*2) {
+    if (newRect.height() < m_handle_size) {
       event->accept();
       return;
     }

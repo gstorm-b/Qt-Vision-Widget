@@ -47,6 +47,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="btn_cancel">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Cancel</string>
        </property>
@@ -54,6 +57,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="btn_back">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Back</string>
        </property>
@@ -61,6 +67,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="btn_next">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Next</string>
        </property>

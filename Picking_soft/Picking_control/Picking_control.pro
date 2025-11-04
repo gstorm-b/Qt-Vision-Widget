@@ -49,6 +49,7 @@ HEADERS += \
 FORMS += \
     custom_widget/dialog_set_new_pattern.ui \
     custom_widget/form_pattern_crop_image.ui \
+    custom_widget/form_pattern_set_conditional_area.ui \
     custom_widget/form_pattern_set_picking_pos.ui \
     form\job\dialog_job_select.ui \
     mainwindow.ui

@@ -60,16 +60,19 @@ public:
 
         btn_cancel = new QPushButton(DialogSetNewPattern);
         btn_cancel->setObjectName("btn_cancel");
+        btn_cancel->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
         horizontalLayout->addWidget(btn_cancel);
 
         btn_back = new QPushButton(DialogSetNewPattern);
         btn_back->setObjectName("btn_back");
+        btn_back->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
         horizontalLayout->addWidget(btn_back);
 
         btn_next = new QPushButton(DialogSetNewPattern);
         btn_next->setObjectName("btn_next");
+        btn_next->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
         horizontalLayout->addWidget(btn_next);
 

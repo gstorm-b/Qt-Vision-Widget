@@ -1,6 +1,6 @@
 #include "item_picking_pos.h"
-
 #include <QtMath>
+
 
 ItemPickingCenter::ItemPickingCenter(QGraphicsItem *parent)
     : QGraphicsItem(parent), m_center(0, 0) {
@@ -8,8 +8,6 @@ ItemPickingCenter::ItemPickingCenter(QGraphicsItem *parent)
   setFlags(ItemIsSelectable |
            ItemSendsScenePositionChanges);
   setAcceptHoverEvents(true);
-
-  // m_rotationAngle = rotation();
 }
 
 QRectF ItemPickingCenter::boundingRect() const {
@@ -19,8 +17,7 @@ QRectF ItemPickingCenter::boundingRect() const {
 
 QPainterPath ItemPickingCenter::shape() const {
   QPainterPath path;
-  path.setFillRule(Qt::WindingFill);
-  // shape
+  // path.setFillRule(Qt::WindingFill);
   path.addEllipse(moveHandleRect());
   path.addEllipse(rotateHandleRect());
   return path;
@@ -59,6 +56,10 @@ void ItemPickingCenter::paint(QPainter *painter,
 }
 
 void ItemPickingCenter::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+  if (!m_movable) {
+    event->accept();
+  }
+
   if (moveHandleRect().contains(event->pos())) {
     m_draggingMove = true;
     event->accept();
@@ -86,15 +87,11 @@ void ItemPickingCenter::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
   } else if (m_draggingRotate) {
     qreal currentAngle = QLineF(m_rotation_origin, event->scenePos()).angle();
     qreal angleDiff = currentAngle - m_press_angle;
-    setRotation(m_original_rotation - angleDiff);
-
-    // avoid rotate out side of parrent
-    QRectF new_rect = mapRectToParent(boundingRect());
-    if (!parentItem()->boundingRect().contains(new_rect)) {
-      setRotation(m_valid_rotation);
-    } else {
-      m_valid_rotation = m_original_rotation - angleDiff;
-    }
+    qreal new_angle = m_original_rotation - angleDiff;
+    new_angle = normalizeRotation(new_angle);
+    // setRotation(m_original_rotation - angleDiff);
+    setRotation(new_angle);
+    // qInfo() << "rotation changed" << this->rotation();
 
     event->accept();
   }
@@ -106,6 +103,7 @@ void ItemPickingCenter::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     emit positionChanged(centerInParent());
   } else if (m_draggingRotate) {
     // m_rotationAngle += m_valid_rotation;
+    m_rotationAngle = this->rotation();
     emit angleChanged(m_rotationAngle);
   }
 
@@ -140,6 +138,25 @@ QRectF ItemPickingCenter::rotateHandleRect() const {
                 handleSize);
 }
 
+qreal ItemPickingCenter::normalizeRotation(qreal angle) const {
+  angle = std::fmod(angle, 360.0);
+  if (angle < 0)
+    angle += 360.0;
+
+  if (angle > 180.0)
+    angle -= 360.0;
+
+  return angle;
+}
+
+void ItemPickingCenter::setPosMovable(bool enable) {
+  m_movable = enable;
+}
+
+const bool ItemPickingCenter::isMovable() {
+  return m_movable;
+}
+
 QPointF ItemPickingCenter::centerInParent() const {
   return mapToParent(m_center);
 }
@@ -151,6 +168,19 @@ void ItemPickingCenter::setAxisLength(qreal length) {
 
 void ItemPickingCenter::setArrowSize(qreal size) {
   m_arrowSize = size;
+  update();
+}
+
+void ItemPickingCenter::setPositionInParent(QPointF pos) {
+  QPointF localCenter = boundingRect().center();
+  QPointF newPos = pos - localCenter;
+  setPos(newPos);
+  update();
+}
+
+void ItemPickingCenter::setAngleInParent(qreal angle) {
+  angle = normalizeRotation(angle);
+  setRotation(angle);
   update();
 }
 

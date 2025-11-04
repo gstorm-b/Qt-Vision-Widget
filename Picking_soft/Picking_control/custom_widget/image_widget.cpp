@@ -263,8 +263,10 @@ void ImageWidget::wheelEvent(QWheelEvent *event) {
 
 void ImageWidget::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {
-    m_roi_started = false;
-    draw_cancelROI();
+    if (m_roi_started) {
+      m_roi_started = false;
+      draw_cancelROI();
+    }
     changeInteractMode(IModeNone);
     event->accept();
   }

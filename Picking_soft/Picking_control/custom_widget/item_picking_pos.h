@@ -15,9 +15,15 @@ public:
   QPainterPath shape() const override;
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
+  void setPosMovable(bool enable);
+  const bool isMovable();
+
   QPointF centerInParent() const;
   void setAxisLength(qreal length);
   void setArrowSize(qreal size);
+
+  void setPositionInParent(QPointF pos);
+  void setAngleInParent(qreal angle);
 
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -31,8 +37,10 @@ signals:
 private:
   QRectF moveHandleRect() const;
   QRectF rotateHandleRect() const;
+  qreal normalizeRotation(qreal angle) const;
 
 private:
+  bool m_movable;
   QPointF m_center;
   QRectF m_moveHandle;
   QRectF m_rotateHandle;
@@ -48,7 +56,5 @@ private:
   qreal m_axisLength = 50;
   qreal m_arrowSize = 10;
   qreal m_centerSize = 5;
-
-  // void updateHandles();
 };
 #endif // ITEM_PICKING_POS_H

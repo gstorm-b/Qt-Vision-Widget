@@ -37,7 +37,7 @@ public:
     {
         if (FormPatternSetPickingPos->objectName().isEmpty())
             FormPatternSetPickingPos->setObjectName("FormPatternSetPickingPos");
-        FormPatternSetPickingPos->resize(632, 460);
+        FormPatternSetPickingPos->resize(694, 450);
         horizontalLayout = new QHBoxLayout(FormPatternSetPickingPos);
         horizontalLayout->setObjectName("horizontalLayout");
         graphics_view = new ImageWidget(FormPatternSetPickingPos);
