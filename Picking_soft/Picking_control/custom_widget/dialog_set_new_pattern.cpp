@@ -69,8 +69,17 @@ DialogSetNewPattern::DialogSetNewPattern(
   connect(form_picking_pos->dspb_angle, &QDoubleSpinBox::editingFinished,
           this, &DialogSetNewPattern::form_picking_angle_edited);
 
-  connect(form_conditional_area->btn_set_roi, &QPushButton::clicked,
-          this, &DialogSetNewPattern::form_condition_area_set_roi_clicked);
+  connect(form_conditional_area->dspb_X, &QDoubleSpinBox::editingFinished,
+          this, &DialogSetNewPattern::form_condition_area_size_edited);
+  connect(form_conditional_area->dspb_Y, &QDoubleSpinBox::editingFinished,
+          this, &DialogSetNewPattern::form_condition_area_size_edited);
+  connect(form_conditional_area->dspb_angle, &QDoubleSpinBox::editingFinished,
+          this, &DialogSetNewPattern::form_condition_area_angle_edited);
+  connect(form_conditional_area->spb_distance, &QDoubleSpinBox::editingFinished,
+          this, &DialogSetNewPattern::form_condition_area_distance_edited);
+
+  // connect(form_conditional_area->btn_set_roi, &QPushButton::clicked,
+  //         this, &DialogSetNewPattern::form_condition_area_set_roi_clicked);
 
   ui->btn_cancel->setDefault(false);
   ui->btn_cancel->setAutoDefault(false);
@@ -179,9 +188,21 @@ void DialogSetNewPattern::form_picking_angle_edited() {
   }
 }
 
-void DialogSetNewPattern::form_condition_area_set_roi_clicked() {
-  form_conditional_area->graphics_view->startDrawROI(ImageWidget::ItemAddType::RotatedROI);
+void DialogSetNewPattern::form_condition_area_size_edited() {
+  QSizeF new_size(form_conditional_area->dspb_X->value(),
+                  form_conditional_area->dspb_Y->value());
+  m_gripper_box->setSize1(new_size);
+  m_gripper_box->setSize2(new_size);
 }
+
+void DialogSetNewPattern::form_condition_area_angle_edited() {
+  m_gripper_box->setPlacementAngle(form_conditional_area->dspb_angle->value());
+}
+
+void DialogSetNewPattern::form_condition_area_distance_edited() {
+  // m_gripper_box->setPlacementAngle(form_conditional_area->dspb_angle);
+}
+
 
 void DialogSetNewPattern::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {
@@ -224,6 +245,20 @@ void DialogSetNewPattern::set_current_step_wg() {
     {
       QPixmap temp_pixmap = form_crop_image->graphics_view->getPixmapItem()->pixmap();
       form_conditional_area->graphics_view->loadImage(temp_pixmap);
+      if (m_gripper_box == nullptr) {
+        m_gripper_box = new ItemGripperBox(form_conditional_area->graphics_view->getPixmapItem());
+      }
+      if (m_item_picking_center_fixed == nullptr) {
+        m_item_picking_center_fixed = new ItemPickingCenter(form_conditional_area->graphics_view->getPixmapItem());
+      }
+
+      m_item_picking_center_fixed->setPosMovable(false);
+      m_item_picking_center_fixed->setPositionInParent(m_item_picking_center->getPositionInParent());
+      m_item_picking_center_fixed->setAngleInParent(m_item_picking_center->getAngleInParent());
+      m_item_picking_center_fixed->setAxisLength(10);
+      m_item_picking_center_fixed->setArrowSize(4);
+      m_item_picking_center_fixed->setDrawHandle(false);
+      m_gripper_box->setPos(m_item_picking_center->pos());
     }
       break;
 

@@ -3,7 +3,9 @@
 
 
 ItemPickingCenter::ItemPickingCenter(QGraphicsItem *parent)
-    : QGraphicsItem(parent), m_center(0, 0) {
+    : QGraphicsItem(parent), m_center(0, 0),
+    m_movable(true),
+    m_drawHandle(true) {
 
   setFlags(ItemIsSelectable |
            ItemSendsScenePositionChanges);
@@ -48,16 +50,26 @@ void ItemPickingCenter::paint(QPainter *painter,
   painter->setBrush(Qt::green);
   painter->drawPolygon(yArrow);
 
-  painter->setBrush(Qt::blue);
-  painter->drawEllipse(center, m_centerSize, m_centerSize);
+  if (m_drawHandle) {
+    painter->setBrush(Qt::blue);
+    painter->drawEllipse(center, m_centerSize, m_centerSize);
 
-  painter->setBrush(Qt::blue);
-  painter->drawEllipse(rotateHandleRect());
+    painter->setBrush(Qt::blue);
+    painter->drawEllipse(rotateHandleRect());
+  }
 }
 
 void ItemPickingCenter::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   if (!m_movable) {
     event->accept();
+    QGraphicsItem::mousePressEvent(event);
+    return;
+  }
+
+  if (!m_drawHandle) {
+    event->accept();
+    QGraphicsItem::mousePressEvent(event);
+    return;
   }
 
   if (moveHandleRect().contains(event->pos())) {
@@ -100,7 +112,7 @@ void ItemPickingCenter::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 
 void ItemPickingCenter::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   if (m_draggingMove) {
-    emit positionChanged(centerInParent());
+    emit positionChanged(getPositionInParent());
   } else if (m_draggingRotate) {
     // m_rotationAngle += m_valid_rotation;
     m_rotationAngle = this->rotation();
@@ -149,16 +161,16 @@ qreal ItemPickingCenter::normalizeRotation(qreal angle) const {
   return angle;
 }
 
+void ItemPickingCenter::setDrawHandle(bool enable) {
+  m_drawHandle = enable;
+}
+
 void ItemPickingCenter::setPosMovable(bool enable) {
   m_movable = enable;
 }
 
 const bool ItemPickingCenter::isMovable() {
   return m_movable;
-}
-
-QPointF ItemPickingCenter::centerInParent() const {
-  return mapToParent(m_center);
 }
 
 void ItemPickingCenter::setAxisLength(qreal length) {
@@ -178,9 +190,17 @@ void ItemPickingCenter::setPositionInParent(QPointF pos) {
   update();
 }
 
+QPointF ItemPickingCenter::getPositionInParent() const {
+  return mapToParent(m_center);
+}
+
 void ItemPickingCenter::setAngleInParent(qreal angle) {
   angle = normalizeRotation(angle);
   setRotation(angle);
   update();
+}
+
+qreal ItemPickingCenter::getAngleInParent() const {
+  return this->rotation();
 }
 

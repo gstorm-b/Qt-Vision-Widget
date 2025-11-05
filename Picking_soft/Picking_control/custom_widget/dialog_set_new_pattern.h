@@ -8,6 +8,7 @@
 #include "custom_widget/image_widget.h"
 #include "custom_widget/item_roi.h"
 #include "custom_widget/item_picking_pos.h"
+#include "custom_widget/item_gripper_box.h"
 
 namespace Ui { class DialogSetNewPattern;
                 class FormPatternCropImage;
@@ -41,7 +42,9 @@ private:
   void form_picking_angle_edited();
 
   // Step 3
-  void form_condition_area_set_roi_clicked();
+  void form_condition_area_size_edited();
+  void form_condition_area_angle_edited();
+  void form_condition_area_distance_edited();
 
 protected:
   void keyPressEvent(QKeyEvent *event) override;
@@ -63,7 +66,7 @@ private:
   QMap<int, QString> m_wg_title_map;
   int m_current_step;
 
-  const int m_max_step = 2;
+  const int m_max_step = 3;
   // step 1 crop pattern
   bool m_has_image;
   ItemRoi *m_item_crop_roi{nullptr};
@@ -71,6 +74,8 @@ private:
   // step 2 set picking position
   ItemPickingCenter *m_item_picking_center{nullptr};
   // sep 3 set conditional area
+  ItemPickingCenter *m_item_picking_center_fixed{nullptr};
+  ItemGripperBox *m_gripper_box{nullptr};
 };
 
 #endif // DIALOG_SET_NEW_PATTERN_H

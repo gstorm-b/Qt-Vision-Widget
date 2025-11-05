@@ -15,15 +15,18 @@ public:
   QPainterPath shape() const override;
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
+  void setDrawHandle(bool enable);
+
   void setPosMovable(bool enable);
   const bool isMovable();
 
-  QPointF centerInParent() const;
   void setAxisLength(qreal length);
   void setArrowSize(qreal size);
 
   void setPositionInParent(QPointF pos);
+  QPointF getPositionInParent() const;
   void setAngleInParent(qreal angle);
+  qreal getAngleInParent() const;
 
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -40,6 +43,7 @@ private:
   qreal normalizeRotation(qreal angle) const;
 
 private:
+  bool m_drawHandle;
   bool m_movable;
   QPointF m_center;
   QRectF m_moveHandle;
