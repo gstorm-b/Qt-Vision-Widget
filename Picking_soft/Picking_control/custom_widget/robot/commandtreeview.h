@@ -30,7 +30,6 @@ signals:
   void commandWillBeDeleted(rp::Command* victim);
   void commandMoved(rp::Command* cmd);
 
-
 protected:
   void mousePressEvent(QMouseEvent* e) override;
 
