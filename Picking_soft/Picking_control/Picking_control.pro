@@ -20,6 +20,7 @@ SOURCES += \
     custom_widget/robot/commandeditorpanel.cpp \
     custom_widget/robot/commandmodel.cpp \
     custom_widget/robot/commandtreeview.cpp \
+    custom_widget/set_workspace_dialog.cpp \
     form/robot/moveleditor.cpp \
     form\job\dialog_job_select.cpp \
     main.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     custom_widget/robot/commandrowwidget.h \
     custom_widget/robot/commandtreeview.h \
     custom_widget/robot/rowdelegate.h \
+    custom_widget/set_workspace_dialog.h \
     custom_widget/tab_widget/tab_widget_button.h \
     form/robot/hyprgcommand.h \
     form/robot/moveleditor.h \
@@ -53,6 +55,7 @@ FORMS += \
     custom_widget/form_pattern_crop_image.ui \
     custom_widget/form_pattern_set_conditional_area.ui \
     custom_widget/form_pattern_set_picking_pos.ui \
+    custom_widget/set_workspace_dialog.ui \
     form\job\dialog_job_select.ui \
     mainwindow.ui
 

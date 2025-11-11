@@ -6,6 +6,8 @@
         <file>icon/new-file-icon.svg</file>
         <file>icon/plus-square-icon.svg</file>
         <file>icon/new-file-icon-dark.svg</file>
+        <file>icon/plc-icon.svg</file>
+        <file>icon/plc-icon-dark.svg</file>
     </qresource>
     <qresource prefix="/style_sheet">
         <file>style/main_style.qss</file>

@@ -27,7 +27,7 @@ void MainWindow::init_main_screen() {
   ui->tbtn_dashboard->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
   ui->tbtn_vision->setText(tr("Vision"));
-  ui->tbtn_vision->setIcon(QIcon(":/icon/icon/vision-icon.svg"));
+  ui->tbtn_vision->setIcon(QIcon(":/icon/icon/plc-icon.svg"));
   ui->tbtn_vision->setIconSize(QSize(70,70));
   ui->tbtn_vision->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
