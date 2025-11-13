@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     custom_widget/dialog_set_new_pattern.cpp \
+    custom_widget/divider_bar.cpp \
     custom_widget/image_widget.cpp \
     custom_widget/item_gripper_box.cpp \
     custom_widget/item_picking_pos.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     custom_widget/dialog_set_new_pattern.h \
+    custom_widget/divider_bar.h \
     custom_widget/icon_button.h \
     custom_widget/image_widget.h \
     custom_widget/item_gripper_box.h \

@@ -15,18 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>10</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
-     <number>10</number>
-    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
@@ -200,7 +188,14 @@
       <widget class="QWidget" name="page_vision">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="ImageWidget" name="graphicsView_main"/>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="ImageWidget" name="graphicsView_main"/>
+          </item>
+          <item>
+           <widget class="DividerBar" name="widget" native="true"/>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -352,6 +347,12 @@
    <class>ImageWidget</class>
    <extends>QGraphicsView</extends>
    <header location="global">custom_widget/image_widget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DividerBar</class>
+   <extends>QWidget</extends>
+   <header location="global">custom_widget/divider_bar.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

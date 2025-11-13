@@ -24,6 +24,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <custom_widget/divider_bar.h>
 #include <custom_widget/image_widget.h>
 #include <custom_widget/robot/commandeditorpanel.h>
 #include <custom_widget/robot/commandtreeview.h>
@@ -52,7 +53,9 @@ public:
     QLabel *label;
     QWidget *page_vision;
     QHBoxLayout *horizontalLayout_4;
+    QVBoxLayout *verticalLayout_4;
     ImageWidget *graphicsView_main;
+    DividerBar *widget;
     QVBoxLayout *verticalLayout_3;
     QPushButton *btn_set_roi;
     QPushButton *btn_set_polygon;
@@ -87,7 +90,6 @@ public:
         centralwidget->setObjectName("centralwidget");
         horizontalLayout = new QHBoxLayout(centralwidget);
         horizontalLayout->setObjectName("horizontalLayout");
-        horizontalLayout->setContentsMargins(2, 10, 2, 10);
         verticalLayout = new QVBoxLayout();
         verticalLayout->setSpacing(0);
         verticalLayout->setObjectName("verticalLayout");
@@ -165,10 +167,20 @@ public:
         page_vision->setObjectName("page_vision");
         horizontalLayout_4 = new QHBoxLayout(page_vision);
         horizontalLayout_4->setObjectName("horizontalLayout_4");
+        verticalLayout_4 = new QVBoxLayout();
+        verticalLayout_4->setObjectName("verticalLayout_4");
         graphicsView_main = new ImageWidget(page_vision);
         graphicsView_main->setObjectName("graphicsView_main");
 
-        horizontalLayout_4->addWidget(graphicsView_main);
+        verticalLayout_4->addWidget(graphicsView_main);
+
+        widget = new DividerBar(page_vision);
+        widget->setObjectName("widget");
+
+        verticalLayout_4->addWidget(widget);
+
+
+        horizontalLayout_4->addLayout(verticalLayout_4);
 
         verticalLayout_3 = new QVBoxLayout();
         verticalLayout_3->setObjectName("verticalLayout_3");

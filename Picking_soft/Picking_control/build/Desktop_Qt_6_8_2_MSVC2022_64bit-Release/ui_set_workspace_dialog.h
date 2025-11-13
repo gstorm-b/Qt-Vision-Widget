@@ -38,7 +38,7 @@ public:
     {
         if (SetWorkspaceDialog->objectName().isEmpty())
             SetWorkspaceDialog->setObjectName("SetWorkspaceDialog");
-        SetWorkspaceDialog->resize(751, 588);
+        SetWorkspaceDialog->resize(625, 607);
         verticalLayout_2 = new QVBoxLayout(SetWorkspaceDialog);
         verticalLayout_2->setObjectName("verticalLayout_2");
         horizontalLayout_2 = new QHBoxLayout();
