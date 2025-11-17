@@ -4,12 +4,10 @@
 SetWorkspaceDialog::SetWorkspaceDialog(
     QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::SetWorkspaceDialog)
-{
+    , ui(new Ui::SetWorkspaceDialog) {
   ui->setupUi(this);
 }
 
-SetWorkspaceDialog::~SetWorkspaceDialog()
-{
+SetWorkspaceDialog::~SetWorkspaceDialog() {
   delete ui;
 }

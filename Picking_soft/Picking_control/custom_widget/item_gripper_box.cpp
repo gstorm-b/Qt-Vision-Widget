@@ -8,7 +8,8 @@ ItemGripperBox::ItemGripperBox(QGraphicsItem *parent)
     m_size2(20.0, 20.0),
     m_placementAngle(0.0),
     m_cacheValid(false) {
-  setFlags(ItemIsMovable | ItemIsSelectable);
+  // setFlags(ItemIsMovable | ItemIsSelectable);
+  // setFlags(ItemIsSelectable);
   setAcceptHoverEvents(true);
 }
 
@@ -49,16 +50,19 @@ void ItemGripperBox::setSize2(const QSizeF &s) {
 }
 
 qreal ItemGripperBox::placementAngle() const {
-  return m_placementAngle;
+  return rotation();
+  // return m_placementAngle;
 }
 
 void ItemGripperBox::setPlacementAngle(qreal angleDeg) {
-  if (!qFuzzyCompare(angleDeg + 1.0, m_placementAngle + 1.0)) {
-    prepareGeometryChange();
-    m_placementAngle = angleDeg;
-    m_cacheValid = false;
-    update();
-  }
+  setRotation(angleDeg);
+  update();
+  // if (!qFuzzyCompare(angleDeg + 1.0, m_placementAngle + 1.0)) {
+  //   prepareGeometryChange();
+  //   m_placementAngle = angleDeg;
+  //   m_cacheValid = false;
+  //   update();
+  // }
 }
 
 QPointF ItemGripperBox::pointAtAngleAndDistance(qreal angleDeg, qreal dist) const {

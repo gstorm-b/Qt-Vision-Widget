@@ -12,6 +12,8 @@ int main(int argc, char *argv[]) {
 
   // load qss
   QFile styleSheetFile(":/style_sheet/style/main_style.qss");
+  // QFile styleSheetFile(":/style_sheet/style/dracula_dark.qss");
+  // QFile styleSheetFile(":/style_sheet/style/dracula_light.qss");
   styleSheetFile.open(QFile::ReadOnly);
   QString styleSheet = QLatin1String(styleSheetFile.readAll());
   a.setStyleSheet(styleSheet);

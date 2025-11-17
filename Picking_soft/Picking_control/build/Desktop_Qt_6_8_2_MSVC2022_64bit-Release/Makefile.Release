@@ -356,7 +356,9 @@ release\qrc_resource.cpp: ..\..\resource.qrc \
 		..\..\icon\dashboard-icon.svg \
 		..\..\icon\new-file-icon-dark.svg \
 		..\..\icon\new-file-icon.svg \
-		..\..\style\main_style.qss
+		..\..\style\main_style.qss \
+		..\..\style\dracula_light.qss \
+		..\..\style\dracula_dark.qss
 	C:\Qt\6.8.2\msvc2022_64\bin\rcc.exe -name resource --no-zstd ..\..\resource.qrc -o release\qrc_resource.cpp
 
 compiler_moc_predefs_make_all: release\moc_predefs.h
@@ -9600,6 +9602,8 @@ release\mainwindow.obj: ..\..\mainwindow.cpp ..\..\mainwindow.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qstatusbar.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QVBoxLayout \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QWidget \
+		..\..\custom_widget\divider_bar.h \
+		C:\Qt\6.8.2\msvc2022_64\include\QtGui\QColor \
 		..\..\custom_widget\image_widget.h \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\QGraphicsView \
 		C:\Qt\6.8.2\msvc2022_64\include\QtWidgets\qgraphicsview.h \

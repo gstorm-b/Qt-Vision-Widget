@@ -27,7 +27,7 @@ private:
   qreal m_distance;
   QSizeF m_size1;
   QSizeF m_size2;
-  qreal m_placementAngle;
+  const qreal m_placementAngle = 0.0;
 
   mutable QRectF m_cachedBounding;
   mutable bool m_cacheValid;

@@ -11,5 +11,8 @@
     </qresource>
     <qresource prefix="/style_sheet">
         <file>style/main_style.qss</file>
+        <file>style/dracula_dark.qss</file>
+        <file>style/dracula_light.qss</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

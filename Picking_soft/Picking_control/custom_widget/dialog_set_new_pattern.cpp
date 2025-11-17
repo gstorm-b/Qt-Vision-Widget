@@ -200,9 +200,8 @@ void DialogSetNewPattern::form_condition_area_angle_edited() {
 }
 
 void DialogSetNewPattern::form_condition_area_distance_edited() {
-  // m_gripper_box->setPlacementAngle(form_conditional_area->dspb_angle);
+  m_gripper_box->setDistance(form_conditional_area->spb_distance->value());
 }
-
 
 void DialogSetNewPattern::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {
