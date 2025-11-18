@@ -1,0 +1,4 @@
+MON_SPEED 50
+SPEED 50
+
+if cycle start 
